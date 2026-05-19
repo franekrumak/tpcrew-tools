@@ -77,27 +77,27 @@ body{padding:10px 8px}
 table,thead,tbody,th,tr{display:block}
 colgroup{display:none}
 th{display:none}
-tr[data-q]{display:flex;flex-wrap:wrap;align-items:center;padding:10px 10px;border-bottom:1px solid var(--brd);gap:4px 8px;position:relative}
+tr[data-q]{display:block;padding:14px 12px;border-bottom:1px solid var(--brd);position:relative}
 tr[data-q]:hover td{background:transparent}
-td{display:inline;padding:0;border:none;font-size:.8em}
-td:nth-child(1){width:100%;display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
-td:nth-child(1) .nm{max-width:none;font-size:.95em}
-td:nth-child(1) .en{font-size:.7em}
-td:nth-child(2){font-size:.72em;color:var(--dim);order:10}
+td{display:block;padding:0;border:none;font-size:.8em}
+td:nth-child(1){padding-right:40px;margin-bottom:8px}
+td:nth-child(1) .nm{max-width:none;font-size:1em;display:block}
+td:nth-child(1) .en{font-size:.72em;display:block;margin-top:2px}
+td:nth-child(2){font-size:.75em;color:var(--dim);margin-bottom:6px;display:inline}
 td:nth-child(2)::before{content:"Asyst: ";color:var(--dim2);font-size:.9em}
-td:nth-child(3){order:11}
-td:nth-child(3) .tg{font-size:.65em}
-td:nth-child(4){order:12}
-td:nth-child(4) .tg{font-size:.65em}
-td:nth-child(5){width:100%;display:block;order:20;margin-top:2px}
-td:nth-child(5)::before{content:"Ostatnia: ";color:var(--dim2);font-size:.72em;font-weight:600}
+td:nth-child(3){display:inline;margin-left:10px}
+td:nth-child(3) .tg{font-size:.7em}
+td:nth-child(4){display:inline;margin-left:4px}
+td:nth-child(4) .tg{font-size:.7em}
+td:nth-child(5){margin-top:10px;padding-top:8px;border-top:1px solid var(--brd)}
+td:nth-child(5)::before{content:"Ostatnia kons: ";color:var(--dim2);font-size:.72em;font-weight:600}
 td:nth-child(5) .kbig{display:inline;font-size:.9em}
-td:nth-child(5) .ksub{display:inline;font-size:.75em}
-td:nth-child(6){width:100%;display:block;order:21}
-td:nth-child(6)::before{content:"Nastepna: ";color:var(--dim2);font-size:.72em;font-weight:600}
+td:nth-child(5) .ksub{display:inline;font-size:.75em;margin-left:4px}
+td:nth-child(6){margin-top:6px}
+td:nth-child(6)::before{content:"Nastepna kons: ";color:var(--dim2);font-size:.72em;font-weight:600}
 td:nth-child(6) .kbig{display:inline;font-size:.9em}
-td:nth-child(6) .ksub{display:inline;font-size:.75em}
-td:nth-child(7){position:absolute;top:10px;right:10px;order:30}
+td:nth-child(6) .ksub{display:inline;font-size:.75em;margin-left:4px}
+td:nth-child(7){position:absolute;top:14px;right:12px}
 }
 </style>
 </head>
@@ -225,7 +225,7 @@ function kcel(d,dn,w){
   if(dn){var n=parseInt(dn);h+='<span class="kbig'+(n>30?' kred':n>14?' kyel':'')+'">'+esc(dn)+'d temu</span>';}
   else if(d&&!isDate){h+='<span class="kbig kurg">'+esc(d)+'</span>';return h;}
   var sub=[];if(d&&d!=='-'&&isDate)sub.push(d);if(w)sub.push(w);
-  if(sub.length)h+='<span class="ksub">'+esc(sub.join(' · '))+'</span>';
+  if(sub.length)h+=' <span class="ksub">'+esc(sub.join(' · '))+'</span>';
   return h;
 }
 function nkcel(d,dn,w){
@@ -235,7 +235,7 @@ function nkcel(d,dn,w){
   if(dn){var n=parseInt(dn);var neg=n<0;h+='<span class="kbig'+(neg?' kred':'')+'">za '+esc(dn)+'d</span>';}
   else if(d&&!isDate){h+='<span class="kbig kurg">'+esc(d)+'</span>';return h;}
   var sub=[];if(d&&d!=='-'&&isDate)sub.push(d);if(w)sub.push(w);
-  if(sub.length)h+='<span class="ksub">'+esc(sub.join(' · '))+'</span>';
+  if(sub.length)h+=' <span class="ksub">'+esc(sub.join(' · '))+'</span>';
   return h;
 }
 
