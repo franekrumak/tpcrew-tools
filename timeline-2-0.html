@@ -6,109 +6,264 @@
 <title>Timeline 2.0 — TPCrew</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root { color-scheme: light; }
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Montserrat', sans-serif; background: #f8fafc; color: #1e293b; font-size: 13px; }
+/* ── Theme variables ── */
+:root {
+  color-scheme: light;
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --text: #1e293b;
+  --muted: #64748b;
+  --dim: #94a3b8;
+  --dim2: #cbd5e1;
+  --border: #e2e8f0;
+  --rborder: #f1f5f9;
+  --thead-bg: #f1f5f9;
+  --hover-bg: #f8fafc;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --error-bg: #fef2f2;
+  --error-border: #fecaca;
+  --error-fg: #dc2626;
+  --footer-link-hover: #2563eb;
+  --gold: #d4a017;
+  --ws-pending-bg: #f1f5f9; --ws-pending-fg: #94a3b8;
+  --ws-sent-bg: #dbeafe; --ws-sent-fg: #2563eb;
+  --ws-replied-bg: #dcfce7; --ws-replied-fg: #16a34a;
+  --ws-quit-bg: #fecaca; --ws-quit-fg: #dc2626;
+  --ws-future-fg: #e2e8f0;
+  --ws-missing-fg: #cbd5e1;
+  --pg-track: #e2e8f0;
+  --cycle-mark: #64748b;
+}
+body.dark {
+  color-scheme: dark;
+  --bg: #0a0e17;
+  --card: #131a2b;
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --dim: #64748b;
+  --dim2: #475569;
+  --border: #1e293b;
+  --rborder: #1a2236;
+  --thead-bg: #1a2236;
+  --hover-bg: #1a2236;
+  --accent: #f0b90b;
+  --accent-hover: #f5d565;
+  --error-bg: #2a1014;
+  --error-border: #7f1d1d;
+  --error-fg: #fca5a5;
+  --footer-link-hover: #f0b90b;
+  --gold: #f0b90b;
+  --ws-pending-bg: #1e293b; --ws-pending-fg: #64748b;
+  --ws-sent-bg: #1e3a5f; --ws-sent-fg: #60a5fa;
+  --ws-replied-bg: #14532d; --ws-replied-fg: #4ade80;
+  --ws-quit-bg: #7f1d1d; --ws-quit-fg: #fca5a5;
+  --ws-future-fg: #334155;
+  --ws-missing-fg: #475569;
+  --pg-track: #1e293b;
+  --cycle-mark: #475569;
+}
 
-.header { padding: 16px 20px 14px; border-bottom: 1px solid #e2e8f0; background: #fff; }
-.header h1 { font-size: 1.15rem; font-weight: 800; color: #1e293b; letter-spacing: -0.3px; }
-.header .sub { font-size: 0.72rem; color: #64748b; margin-top: 2px; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: var(--text); font-size: 13px; transition: background 0.2s, color 0.2s; }
+
+/* ── Header ── */
+.header { padding: 16px 20px 14px; border-bottom: 1px solid var(--border); background: var(--card); }
+.header-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.header h1 { font-size: 1.15rem; font-weight: 800; color: var(--text); letter-spacing: -0.3px; }
+.header .sub { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+
+.btn-theme {
+  padding: 5px 14px; border: 1px solid var(--border); border-radius: 8px;
+  background: var(--card); color: var(--text); font-weight: 600; cursor: pointer;
+  font-size: 0.7rem; font-family: inherit; letter-spacing: 0.4px;
+  display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0;
+  transition: border-color 0.2s, color 0.2s;
+}
+.btn-theme:hover { border-color: var(--gold); color: var(--gold); }
+.btn-theme .ic { font-size: 0.85rem; }
+
 .controls { display: flex; gap: 8px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
-.controls select { padding: 5px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.76rem; font-family: inherit; background: #fff; }
-.btn-refresh { padding: 5px 14px; border: none; border-radius: 8px; background: #2563eb; color: #fff; font-weight: 600; cursor: pointer; font-size: 0.76rem; font-family: inherit; }
-.btn-refresh:hover { background: #1d4ed8; }
+.controls select {
+  padding: 5px 10px; border: 1px solid var(--border); border-radius: 8px;
+  font-size: 0.76rem; font-family: inherit; background: var(--card); color: var(--text);
+}
+.btn-refresh {
+  padding: 5px 14px; border: none; border-radius: 8px; background: var(--accent); color: #fff;
+  font-weight: 600; cursor: pointer; font-size: 0.76rem; font-family: inherit;
+}
+.btn-refresh:hover { background: var(--accent-hover); }
+.btn-mobile {
+  padding: 5px 14px; border: 1px solid var(--border); border-radius: 8px;
+  background: var(--card); color: var(--text); font-weight: 600; cursor: pointer;
+  font-size: 0.76rem; font-family: inherit;
+}
+.btn-mobile:hover { background: var(--hover-bg); }
+
 .stats { margin-left: auto; display: flex; gap: 12px; }
 .stat-box { text-align: center; }
 .stat-num { font-size: 1.1rem; font-weight: 800; }
-.stat-label { font-size: 0.6rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+.stat-label { font-size: 0.6rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
 
-.loading { text-align: center; padding: 60px 20px; color: #64748b; }
-.spinner { display: inline-block; width: 22px; height: 22px; border: 3px solid #e2e8f0; border-top-color: #2563eb; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 8px; }
+.loading { text-align: center; padding: 60px 20px; color: var(--muted); }
+.spinner { display: inline-block; width: 22px; height: 22px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 8px; }
 @keyframes spin { to { transform: rotate(360deg); } }
-.error { background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 14px; color: #dc2626; font-size: 0.82rem; margin: 20px; }
+.error { background: var(--error-bg); border: 1px solid var(--error-border); border-radius: 12px; padding: 14px; color: var(--error-fg); font-size: 0.82rem; margin: 20px; }
 
-/* Table */
+/* ── Table (desktop) ── */
 .table-wrap { padding: 12px 16px 20px; overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; }
-thead th { background: #f1f5f9; padding: 8px 10px; text-align: left; font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #e2e8f0; white-space: nowrap; }
+thead th { background: var(--thead-bg); padding: 8px 10px; text-align: left; font-size: 0.68rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid var(--border); white-space: nowrap; }
 thead th.center { text-align: center; }
-tbody tr { border-bottom: 1px solid #f1f5f9; transition: background 0.15s; }
-tbody tr:hover { background: #f8fafc; }
+tbody tr { border-bottom: 1px solid var(--rborder); transition: background 0.15s; }
+tbody tr:hover { background: var(--hover-bg); }
 tbody tr.quit-row { opacity: 0.45; }
 tbody tr.quit-row:hover { opacity: 0.7; }
 td { padding: 8px 10px; vertical-align: middle; }
 
-/* Person cell */
-.p-name { font-weight: 700; font-size: 0.82rem; }
-.p-meta { font-size: 0.68rem; color: #64748b; }
-.p-id { color: #94a3b8; font-weight: 500; font-size: 0.72rem; }
+.p-name { font-weight: 700; font-size: 0.82rem; color: var(--text); }
+.p-meta { font-size: 0.68rem; color: var(--muted); }
+.p-id { color: var(--dim); font-weight: 500; font-size: 0.72rem; }
 
-/* Day number */
 .day-num { font-size: 1.3rem; font-weight: 800; text-align: center; min-width: 55px; }
-.day-small { font-size: 0.6rem; font-weight: 500; color: #94a3b8; }
+.day-small { font-size: 0.6rem; font-weight: 500; color: var(--dim); }
 .day-green { color: #16a34a; }
 .day-yellow { color: #d97706; }
 .day-red { color: #dc2626; }
-.day-gray { color: #94a3b8; }
+.day-gray { color: var(--dim); }
 
-/* Progress bar */
 .progress-wrap { min-width: 160px; max-width: 220px; }
-.progress-outer { background: #e2e8f0; border-radius: 6px; height: 12px; position: relative; overflow: visible; margin-bottom: 10px; }
+.progress-outer { background: var(--pg-track); border-radius: 6px; height: 12px; position: relative; overflow: visible; margin-bottom: 10px; }
 .progress-inner { height: 100%; border-radius: 6px; transition: width 0.3s; position: relative; z-index: 1; overflow: hidden; }
-.progress-label { font-size: 0.62rem; color: #94a3b8; margin-top: 2px; display: flex; justify-content: space-between; }
+.progress-label { font-size: 0.62rem; color: var(--dim); margin-top: 2px; display: flex; justify-content: space-between; }
 .pg-green { background: linear-gradient(90deg, #22c55e, #16a34a); }
 .pg-yellow { background: linear-gradient(90deg, #facc15, #eab308); }
 .pg-red { background: linear-gradient(90deg, #f87171, #dc2626); }
-.pg-gray { background: #94a3b8; }
-.cycle-mark { position: absolute; top: -2px; width: 2px; height: 16px; background: #64748b; border-radius: 1px; z-index: 2; opacity: 0.5; }
-.cycle-label { position: absolute; top: 16px; font-size: 0.5rem; color: #94a3b8; transform: translateX(-50%); font-weight: 600; white-space: nowrap; }
+.pg-gray { background: var(--dim); }
+.cycle-mark { position: absolute; top: -2px; width: 2px; height: 16px; background: var(--cycle-mark); border-radius: 1px; z-index: 2; opacity: 0.5; }
+.cycle-label { position: absolute; top: 16px; font-size: 0.5rem; color: var(--dim); transform: translateX(-50%); font-weight: 600; white-space: nowrap; }
 
-/* Week status cells */
 .ws { text-align: center; min-width: 38px; }
 .ws-icon { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; }
-.ws-pending { background: #f1f5f9; color: #94a3b8; }
-.ws-future { background: transparent; color: #e2e8f0; }
-.ws-sent { background: #dbeafe; color: #2563eb; }
-.ws-replied { background: #dcfce7; color: #16a34a; }
-.ws-quit { background: #fecaca; color: #dc2626; }
-.ws-missing { background: #f1f5f9; color: #cbd5e1; font-style: italic; }
+.ws-pending { background: var(--ws-pending-bg); color: var(--ws-pending-fg); }
+.ws-future { background: transparent; color: var(--ws-future-fg); }
+.ws-sent { background: var(--ws-sent-bg); color: var(--ws-sent-fg); }
+.ws-replied { background: var(--ws-replied-bg); color: var(--ws-replied-fg); }
+.ws-quit { background: var(--ws-quit-bg); color: var(--ws-quit-fg); }
+.ws-missing { background: var(--ws-pending-bg); color: var(--ws-missing-fg); font-style: italic; }
 
-/* Clickable person name */
 .p-name a { color: inherit; text-decoration: none; }
-.p-name a:hover { text-decoration: underline; color: #2563eb; }
+.p-name a:hover { text-decoration: underline; color: var(--accent); }
 
-/* Signup date */
-.signup-cell { font-size: 0.75rem; color: #64748b; white-space: nowrap; }
+.signup-cell { font-size: 0.75rem; color: var(--muted); white-space: nowrap; }
 
-.footer { text-align: center; color: #94a3b8; font-size: 0.68rem; padding: 12px 0 16px; border-top: 1px solid #e2e8f0; margin-top: 8px; }
-.footer a { color: #94a3b8; text-decoration: none; }
-.footer a:hover { color: #2563eb; }
+.footer { text-align: center; color: var(--dim); font-size: 0.68rem; padding: 12px 16px 16px; border-top: 1px solid var(--border); margin-top: 8px; }
+.footer a { color: var(--dim); text-decoration: none; }
+.footer a:hover { color: var(--footer-link-hover); }
 
 /* Summary panel — enroller ranking */
 .summary-panel { padding: 10px 20px 6px; }
 .enroller-grid { column-count: 2; column-gap: 16px; }
-.enroller-row { break-inside: avoid; display: flex; align-items: center; gap: 6px; }
-.enroller-count { font-size: 0.72rem; font-weight: 800; color: #2563eb; min-width: 16px; text-align: right; }
-.enroller-bar-wrap { flex: 1; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; }
+.enroller-row { break-inside: avoid; display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.enroller-count { font-size: 0.72rem; font-weight: 800; color: var(--accent); min-width: 16px; text-align: right; }
+.enroller-bar-wrap { flex: 1; height: 8px; background: var(--pg-track); border-radius: 4px; overflow: hidden; }
 .enroller-bar-fill { height: 100%; background: linear-gradient(90deg, #3b82f6, #2563eb); border-radius: 4px; }
-.enroller-name { font-size: 0.7rem; font-weight: 600; color: #1e293b; white-space: nowrap; min-width: 80px; }
+body.dark .enroller-bar-fill { background: linear-gradient(90deg, #f5d565, #d4a017); }
+.enroller-name { font-size: 0.7rem; font-weight: 600; color: var(--text); white-space: nowrap; min-width: 80px; }
 
 /* Legend */
 .legend { display: flex; gap: 14px; padding: 10px 20px; flex-wrap: wrap; }
-.legend-item { display: flex; align-items: center; gap: 4px; font-size: 0.68rem; color: #64748b; }
+.legend-item { display: flex; align-items: center; gap: 4px; font-size: 0.68rem; color: var(--muted); }
 .legend-dot { width: 14px; height: 14px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.55rem; font-weight: 700; }
 
-/* Mobile mode */
-.btn-mobile { padding: 5px 14px; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; color: #1e293b; font-weight: 600; cursor: pointer; font-size: 0.76rem; font-family: inherit; }
-.btn-mobile:hover { background: #f1f5f9; }
-.btn-mobile.active { background: #1e293b; color: #fff; border-color: #1e293b; }
+/* ── Mobile: cards layout ── */
+@media (max-width: 700px) {
+  body { font-size: 13px; }
+  .header { padding: 12px 14px 10px; }
+  .header h1 { font-size: 1.05rem; }
+  .header .sub { font-size: 0.66rem; }
+  .controls { gap: 6px; margin-top: 8px; }
+  .controls select { font-size: 0.72rem; padding: 5px 8px; flex: 1; min-width: 0; }
+  .btn-refresh, .btn-mobile { font-size: 0.72rem; padding: 5px 10px; }
+  .stats { width: 100%; margin-left: 0; margin-top: 8px; justify-content: space-around; }
+  .stat-num { font-size: 1.25rem; }
+
+  .summary-panel { padding: 8px 14px 4px; }
+  .enroller-grid { column-count: 2; column-gap: 10px; }
+  .enroller-name { min-width: 0; font-size: 0.66rem; }
+  .enroller-count { font-size: 0.66rem; min-width: 14px; }
+
+  .legend { padding: 8px 14px; gap: 10px; }
+  .legend-item { font-size: 0.62rem; }
+
+  /* Convert table to cards */
+  .table-wrap { padding: 8px 10px 14px; overflow-x: visible; }
+  table, thead, tbody, tr, td { display: block; }
+  thead { display: none; }
+  tbody tr {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 10px;
+    position: relative;
+  }
+  tbody tr:hover { background: var(--card); }
+  td { padding: 0; border: none; }
+
+  /* Card column-1: name + meta — full width minus day number on right */
+  td.col-osoba { padding-right: 60px; margin-bottom: 8px; }
+  .p-name { font-size: 0.95rem; line-height: 1.2; }
+  .p-meta { font-size: 0.72rem; margin-top: 2px; }
+  .p-id { font-size: 0.75rem; }
+
+  /* Day number — pinned top-right */
+  td.col-day {
+    position: absolute; top: 12px; right: 12px;
+    min-width: 0; text-align: right;
+  }
+  .day-num { font-size: 1.55rem; line-height: 1; min-width: 0; }
+  .day-small { font-size: 0.62rem; }
+
+  /* Progress — full width */
+  td.col-progress { min-width: 0; max-width: none; margin-bottom: 8px; }
+  .progress-outer { height: 10px; }
+
+  /* Week status row — flex line, full width */
+  .mobile-weeks {
+    display: flex; gap: 6px; align-items: center; margin-top: 6px;
+    flex-wrap: wrap;
+  }
+  td.col-w { display: inline-block; padding: 0; }
+  .week-label {
+    display: inline-block; font-size: 0.55rem; font-weight: 700;
+    color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px;
+    margin-right: 4px;
+  }
+  .ws-icon { width: 28px; height: 28px; font-size: 0.85rem; }
+
+  /* Signup — inline next to weeks */
+  td.col-signup {
+    display: inline-block; margin-left: auto;
+    font-size: 0.72rem; color: var(--muted);
+  }
+  .signup-inline { font-weight: 700; color: var(--text); }
+}
 </style>
 </head>
 <body>
 
 <div class="header">
-  <h1>Timeline 2.0</h1>
-  <p class="sub">LEG #2 HARD ONBOARD | Calendar-Driven | Cykl 28d (kreski na pasku)</p>
+  <div class="header-top">
+    <div>
+      <h1>Timeline 2.0</h1>
+      <p class="sub">LEG #2 HARD ONBOARD | Calendar-Driven | Cykl 28d (kreski na pasku)</p>
+    </div>
+    <button class="btn-theme" id="btnTheme" onclick="toggleTheme()">
+      <span class="ic" id="themeIcon">&#9789;</span>
+      <span id="themeLabel">DARK</span>
+    </button>
+  </div>
   <div class="controls">
     <select id="filterStatus">
       <option value="all">Wszyscy (0-90d)</option>
@@ -123,7 +278,7 @@ td { padding: 8px 10px; vertical-align: middle; }
       <option value="name">A-Z</option>
     </select>
     <button class="btn-refresh" onclick="loadTimeline()">Odswiez</button>
-    <button class="btn-mobile" id="btnDownload" onclick="downloadPNG()">&#x2B07; Pobierz PNG</button>
+    <button class="btn-mobile" id="btnDownload" onclick="downloadPNG()">&#x2B07; PNG</button>
     <div class="stats" id="statsArea"></div>
   </div>
 </div>
@@ -141,57 +296,64 @@ td { padding: 8px 10px; vertical-align: middle; }
   <div class="legend-item"><div class="legend-dot ws-sent">&#128221;</div> Wyslano</div>
   <div class="legend-item"><div class="legend-dot ws-replied">&#9989;</div> Odpisal/a</div>
   <div class="legend-item"><div class="legend-dot ws-quit">&#10060;</div> Quit</div>
-  <div class="legend-item"><div class="legend-dot ws-future" style="border:1px solid #e2e8f0;">&middot;</div> Przyszly</div>
+  <div class="legend-item"><div class="legend-dot ws-future" style="border:1px solid var(--border);">&middot;</div> Przyszly</div>
 </div>
 
 <div class="footer">
   Take Profit Crew &mdash; Timeline System | Calendar-Driven Live Dashboard
-  &nbsp;&middot;&nbsp; <a href="../">&larr; Powrot do TPCrew Tools</a>
+  &nbsp;&middot;&nbsp; <a href="./">&larr; Powrot do TPCrew Tools</a>
 </div>
 
 <script>
-// =======================================================================
-// CALENDAR-DRIVEN ARCHITECTURE (GitHub Pages edition)
-// People are derived 100% from WEEK events in Google Calendar.
-// No hardcoded list — new enrollments show up automatically.
-// Data source: Google Calendar API v3 (public calendar + restricted API key).
-// =======================================================================
-
 const API_KEY = 'AIzaSyCHpZDpQ96aJWakdYXGbODs8e_H8oc3JNE';
 const LEG2_CAL = 'd749104fae9417b361e3c7a8c14e3df6a6a555738ac581c30c89f1e3122d03bc@group.calendar.google.com';
 const TOTAL_DAYS = 90;
-const WEEK_OFFSETS = [7, 14, 21, 30, 35]; // WEEK 1-5 day offsets from signup
+const WEEK_OFFSETS = [7, 14, 21, 30, 35];
 
-// ── Utility functions ──────────────────────────────────────────────────
+// ── Theme ──────────────────────────────────────────────────────────────
+function applyTheme(theme) {
+  if (theme === 'dark') {
+    document.body.classList.add('dark');
+    document.getElementById('themeIcon').innerHTML = '&#9728;'; // sun
+    document.getElementById('themeLabel').textContent = 'LIGHT';
+  } else {
+    document.body.classList.remove('dark');
+    document.getElementById('themeIcon').innerHTML = '&#9789;'; // moon
+    document.getElementById('themeLabel').textContent = 'DARK';
+  }
+}
+function toggleTheme() {
+  const isDark = document.body.classList.contains('dark');
+  const next = isDark ? 'light' : 'dark';
+  applyTheme(next);
+  try { localStorage.setItem('timeline-theme', next); } catch (e) {}
+}
+(function initTheme() {
+  let saved = 'light';
+  try { saved = localStorage.getItem('timeline-theme') || 'light'; } catch (e) {}
+  applyTheme(saved);
+})();
 
+// ── Utility ────────────────────────────────────────────────────────────
 function todayDate() {
   const d = new Date();
   return new Date(d.getFullYear(), d.getMonth(), d.getDate());
 }
-
 function parseDate(s) {
   if (!s) return null;
   const m = s.match(/(\d{4})-(\d{2})-(\d{2})/);
   return m ? new Date(parseInt(m[1]), parseInt(m[2]) - 1, parseInt(m[3])) : null;
 }
-
-function daysBetween(d1, d2) {
-  return Math.round((d2 - d1) / 86400000);
-}
-
+function daysBetween(d1, d2) { return Math.round((d2 - d1) / 86400000); }
 function fmtDate(s) {
   if (!s) return '—';
   const m = s.match(/(\d{4})-(\d{2})-(\d{2})/);
   return m ? m[3] + '.' + m[2] : s;
 }
-
-// Normalize name: strip diacritics, lowercase, collapse spaces
 function normName(n) {
   let s = n.replace(/ł/g, 'l').replace(/Ł/g, 'L');
   return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ').trim();
 }
-
-// Levenshtein distance
 function levenshtein(a, b) {
   const m = a.length, n = b.length;
   const d = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
@@ -202,8 +364,6 @@ function levenshtein(a, b) {
       d[i][j] = Math.min(d[i-1][j] + 1, d[i][j-1] + 1, d[i-1][j-1] + (a[i-1] === b[j-1] ? 0 : 1));
   return d[m][n];
 }
-
-// Polish name aliases (diminutives <-> full names)
 const NAME_ALIASES = {
   'kuba':'jakub','jakub':'kuba',
   'tomek':'tomasz','tomasz':'tomek',
@@ -220,59 +380,41 @@ const NAME_ALIASES = {
   'marta':'martyna','martyna':'marta',
 };
 
-// ── Calendar data fetching (Google Calendar API v3) ────────────────────
-
+// ── Calendar fetch ─────────────────────────────────────────────────────
 async function fetchEventsFromCal(calId) {
   const today = new Date();
   const from = new Date(today); from.setDate(from.getDate() - 130);
   const to = new Date(today); to.setDate(to.getDate() + 45);
   const timeMin = from.toISOString();
   const timeMax = to.toISOString();
-
   let allEvents = [];
   let pageToken = null;
-  let safetyCounter = 0;
+  let safety = 0;
   do {
     const params = new URLSearchParams({
-      key: API_KEY,
-      timeMin: timeMin,
-      timeMax: timeMax,
-      maxResults: '250',
-      singleEvents: 'true',
-      orderBy: 'startTime'
+      key: API_KEY, timeMin, timeMax,
+      maxResults: '250', singleEvents: 'true', orderBy: 'startTime'
     });
     if (pageToken) params.set('pageToken', pageToken);
     const url = 'https://www.googleapis.com/calendar/v3/calendars/' + encodeURIComponent(calId) + '/events?' + params.toString();
     const resp = await fetch(url);
     const data = await resp.json();
-    if (data.error) {
-      throw new Error('Calendar API: ' + (data.error.message || 'unknown error'));
-    }
+    if (data.error) throw new Error('Calendar API: ' + (data.error.message || 'unknown'));
     const events = data.items || [];
     allEvents = allEvents.concat(events.map(e => ({ ...e, _calId: calId })));
     pageToken = data.nextPageToken || null;
-    safetyCounter++;
-    if (safetyCounter > 50) break; // hard safety stop
+    safety++; if (safety > 50) break;
   } while (pageToken);
   return allEvents;
 }
+async function fetchAllCalendarEvents() { return await fetchEventsFromCal(LEG2_CAL); }
 
-async function fetchAllCalendarEvents() {
-  // Only LEG #2 — all prawa noga people have WEEK events here.
-  return await fetchEventsFromCal(LEG2_CAL);
-}
-
-// ── Event parsing & people extraction ──────────────────────────────────
-
-// WEEK event title regex — handles all format variants:
-// "✅ 1 WEEK: Name (Enroller)", "📝 2 week: ❗️Name", "3 WEEK: Name" etc.
+// ── Parsing ────────────────────────────────────────────────────────────
 const WEEK_RE = /^([\u{1F4DD}✅❌⌛⏳☠️\u{1F525}❗\s]*?)(\d)\s*[Ww][Ee][Ee][Kk]:\s*(.+?)(?:\s*\((.+?)\))?\s*$/u;
 
-// Parse structured description from event body
 function parseEventDescription(desc) {
   if (!desc) return {};
   const meta = {};
-  // Strip HTML tags (Calendar API v3 returns HTML in description if event was created via web UI)
   const plain = desc.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '');
   for (const line of plain.split('\n')) {
     const colonIdx = line.indexOf(':');
@@ -295,69 +437,45 @@ function parseEventDescription(desc) {
   return meta;
 }
 
-// Check if two normalized names refer to the same person
 function areNamesSamePerson(key1, key2) {
   if (key1 === key2) return true;
   const p1 = key1.split(' '), p2 = key2.split(' ');
   const f1 = p1[0], f2 = p2[0];
   const l1 = p1[p1.length - 1], l2 = p2[p2.length - 1];
-
-  // First names must match or be aliases
   const firstMatch = f1 === f2 || NAME_ALIASES[f1] === f2 || NAME_ALIASES[f2] === f1;
   if (!firstMatch) return false;
-
-  // Last names: exact, substring (hyphenated), or Levenshtein <= 1
   if (l1 === l2) return true;
   if (l1.includes(l2) || l2.includes(l1)) return true;
   if (levenshtein(l1, l2) <= 1) return true;
   return false;
 }
 
-// Build people array entirely from calendar WEEK events
 function buildPeopleFromEvents(allEvents) {
-  const rawMap = {}; // normKey -> person data
-
+  const rawMap = {};
   for (const ev of allEvents) {
     const title = ev.summary || '';
     const m = title.match(WEEK_RE);
     if (!m) continue;
-
     const prefix = (m[1] || '').trim();
     const weekNum = parseInt(m[2]);
     let rawName = m[3].trim().replace(/❗️?/g, '').replace(/❗/g, '').trim();
     const enrollerFromTitle = m[4] ? m[4].trim() : null;
     const key = normName(rawName);
-
-    // Determine week status from prefix emoji
     let weekStatus = 'exists';
     if (prefix.includes('✅')) weekStatus = 'replied';
     else if (prefix.includes('📝')) weekStatus = 'sent';
     else if (prefix.includes('❌') || prefix.includes('☠️')) weekStatus = 'quit';
     else if (prefix.includes('⌛') || prefix.includes('⏳')) weekStatus = 'paused';
-
-    // Init person entry if new
     if (!rawMap[key]) {
-      rawMap[key] = {
-        name: rawName,
-        weeks: {},
-        hasQuit: false,
-        meta: {},
-        enrollerFromTitle: enrollerFromTitle,
-        earliestEventDate: null,
-        earliestWeekNum: null,
-        calIds: new Set()
-      };
+      rawMap[key] = { name: rawName, weeks: {}, hasQuit: false, meta: {}, enrollerFromTitle, earliestEventDate: null, earliestWeekNum: null, calIds: new Set() };
     }
-
     if (ev._calId) rawMap[key].calIds.add(ev._calId);
-
     const priority = { replied: 3, sent: 2, quit: 1, paused: 1, exists: 0 };
     const existing = rawMap[key].weeks[weekNum];
     if (!existing || (priority[weekStatus] || 0) > (priority[existing] || 0)) {
       rawMap[key].weeks[weekNum] = weekStatus;
     }
     if (weekStatus === 'quit') rawMap[key].hasQuit = true;
-
     const desc = ev.description || '';
     if (desc) {
       const meta = parseEventDescription(desc);
@@ -365,7 +483,6 @@ function buildPeopleFromEvents(allEvents) {
         if (!rawMap[key].meta[mk]) rawMap[key].meta[mk] = mv;
       }
     }
-
     const evDate = (ev.start && (ev.start.date || ev.start.dateTime)) || null;
     if (evDate) {
       const parsed = parseDate(evDate);
@@ -374,16 +491,13 @@ function buildPeopleFromEvents(allEvents) {
         rawMap[key].earliestWeekNum = weekNum;
       }
     }
-
     if (enrollerFromTitle && !rawMap[key].enrollerFromTitle) {
       rawMap[key].enrollerFromTitle = enrollerFromTitle;
     }
   }
 
-  // ── Fuzzy dedup pass ──
   const keys = Object.keys(rawMap);
   const merged = new Set();
-
   for (let i = 0; i < keys.length; i++) {
     if (merged.has(keys[i])) continue;
     for (let j = i + 1; j < keys.length; j++) {
@@ -400,9 +514,7 @@ function buildPeopleFromEvents(allEvents) {
         for (const [mk, mv] of Object.entries(src.meta)) {
           if (!dst.meta[mk]) dst.meta[mk] = mv;
         }
-        if (!dst.enrollerFromTitle && src.enrollerFromTitle) {
-          dst.enrollerFromTitle = src.enrollerFromTitle;
-        }
+        if (!dst.enrollerFromTitle && src.enrollerFromTitle) dst.enrollerFromTitle = src.enrollerFromTitle;
         for (const cid of src.calIds) dst.calIds.add(cid);
         if (src.name.length > dst.name.length) dst.name = src.name;
         merged.add(keys[j]);
@@ -410,14 +522,11 @@ function buildPeopleFromEvents(allEvents) {
     }
   }
 
-  // ── Build final people array ──
   const today = todayDate();
   const people = [];
-
   for (const key of keys) {
     if (merged.has(key)) continue;
     const p = rawMap[key];
-
     let signupDate = p.meta.signupDate || null;
     if (!signupDate && p.earliestEventDate && p.earliestWeekNum) {
       const offset = WEEK_OFFSETS[p.earliestWeekNum - 1] || 7;
@@ -425,41 +534,28 @@ function buildPeopleFromEvents(allEvents) {
       est.setDate(est.getDate() - offset);
       signupDate = est.toISOString().split('T')[0];
     }
-
     const sd = parseDate(signupDate);
     const currentDay = sd ? daysBetween(sd, today) : 0;
     let sponsor = p.meta.sponsor || p.enrollerFromTitle || '—';
     sponsor = sponsor.replace(/\s*\(.*?\)\s*/g, '').trim() || '—';
-
     people.push({
-      name: p.name,
-      jifuId: p.meta.jifuId || '—',
-      signupDate: signupDate || '—',
-      sponsor,
-      fb: p.meta.fb || '',
-      messenger: p.meta.messenger || '',
-      currentDay,
-      weeks: p.weeks,
-      hasQuit: p.hasQuit
+      name: p.name, jifuId: p.meta.jifuId || '—', signupDate: signupDate || '—',
+      sponsor, fb: p.meta.fb || '', messenger: p.meta.messenger || '',
+      currentDay, weeks: p.weeks, hasQuit: p.hasQuit
     });
   }
-
   return people;
 }
 
 // ── Rendering ──────────────────────────────────────────────────────────
-
 function renderTimeline(allPeople) {
   const filter = document.getElementById('filterStatus').value;
   const sort = document.getElementById('sortBy').value;
-
   let people = [...allPeople];
-
   if (filter === 'fresh') people = people.filter(p => p.currentDay >= 0 && p.currentDay <= 30);
   else if (filter === 'mid') people = people.filter(p => p.currentDay > 30 && p.currentDay <= 60);
   else if (filter === 'late') people = people.filter(p => p.currentDay > 60 && p.currentDay <= 90);
   else people = people.filter(p => p.currentDay >= 0 && p.currentDay <= 90);
-
   if (sort === 'newest') people.sort((a, b) => a.currentDay - b.currentDay);
   else if (sort === 'oldest') people.sort((a, b) => b.currentDay - a.currentDay);
   else if (sort === 'day-desc') people.sort((a, b) => b.currentDay - a.currentDay);
@@ -469,15 +565,13 @@ function renderTimeline(allPeople) {
   const quit = people.filter(p => p.hasQuit).length;
   const active = total - quit;
   document.getElementById('statsArea').innerHTML = `
-    <div class="stat-box"><div class="stat-num" style="color:#2563eb">${total}</div><div class="stat-label">Osob</div></div>
+    <div class="stat-box"><div class="stat-num" style="color:var(--accent)">${total}</div><div class="stat-label">Osob</div></div>
     <div class="stat-box"><div class="stat-num" style="color:#16a34a">${active}</div><div class="stat-label">Aktywni</div></div>
     <div class="stat-box"><div class="stat-num" style="color:#dc2626">${quit}</div><div class="stat-label">Quit</div></div>
   `;
 
-  // Enroller ranking
   const panel = document.getElementById('summaryPanel');
   panel.style.display = 'block';
-
   const members90 = allPeople.filter(p => p.currentDay >= 0 && p.currentDay <= 90);
   const enrollerMap = {};
   for (const p of members90) {
@@ -507,7 +601,7 @@ function renderTimeline(allPeople) {
   document.getElementById('enrollerGrid').innerHTML = gridHtml;
 
   if (people.length === 0) {
-    document.getElementById('content').innerHTML = '<div class="loading" style="color:#94a3b8">Brak osob w wybranym filtrze.</div>';
+    document.getElementById('content').innerHTML = '<div class="loading" style="color:var(--dim)">Brak osob w wybranym filtrze.</div>';
     return;
   }
 
@@ -516,42 +610,37 @@ function renderTimeline(allPeople) {
     <th style="min-width:200px;">Osoba</th>
     <th class="center" style="min-width:60px;">Dzien</th>
     <th style="min-width:160px;">Progress</th>
-    <th class="center" style="line-height:1.2;">W1<div style="font-size:0.5rem;font-weight:500;color:#94a3b8;text-transform:none;letter-spacing:0;">kopiuj-wklej</div></th>
-    <th class="center" style="line-height:1.2;">W2<div style="font-size:0.5rem;font-weight:500;color:#94a3b8;text-transform:none;letter-spacing:0;">skaner</div></th>
-    <th class="center" style="line-height:1.2;">W3<div style="font-size:0.5rem;font-weight:500;color:#94a3b8;text-transform:none;letter-spacing:0;">TP + residual</div></th>
-    <th class="center" style="line-height:1.2;">W4<div style="font-size:0.5rem;font-weight:500;color:#94a3b8;text-transform:none;letter-spacing:0;">opinia</div></th>
-    <th class="center" style="line-height:1.2;">W5<div style="font-size:0.5rem;font-weight:500;color:#94a3b8;text-transform:none;letter-spacing:0;">last touch</div></th>
+    <th class="center" style="line-height:1.2;">W1<div style="font-size:0.5rem;font-weight:500;color:var(--dim);text-transform:none;letter-spacing:0;">kopiuj-wklej</div></th>
+    <th class="center" style="line-height:1.2;">W2<div style="font-size:0.5rem;font-weight:500;color:var(--dim);text-transform:none;letter-spacing:0;">skaner</div></th>
+    <th class="center" style="line-height:1.2;">W3<div style="font-size:0.5rem;font-weight:500;color:var(--dim);text-transform:none;letter-spacing:0;">TP + residual</div></th>
+    <th class="center" style="line-height:1.2;">W4<div style="font-size:0.5rem;font-weight:500;color:var(--dim);text-transform:none;letter-spacing:0;">opinia</div></th>
+    <th class="center" style="line-height:1.2;">W5<div style="font-size:0.5rem;font-weight:500;color:var(--dim);text-transform:none;letter-spacing:0;">last touch</div></th>
     <th>Signup</th>
   </tr></thead><tbody>`;
 
   for (const p of people) {
     const pct = Math.min(100, Math.round((p.currentDay / TOTAL_DAYS) * 100));
     const rowCls = p.hasQuit ? 'quit-row' : '';
-
     let dayColorCls = 'day-green';
     if (p.hasQuit) dayColorCls = 'day-gray';
     else if (p.currentDay > 60) dayColorCls = 'day-red';
     else if (p.currentDay > 30) dayColorCls = 'day-yellow';
-
     let pgCls = 'pg-green';
     if (p.hasQuit) pgCls = 'pg-gray';
     else if (p.currentDay > 60) pgCls = 'pg-red';
     else if (p.currentDay > 30) pgCls = 'pg-yellow';
 
     html += `<tr class="${rowCls}">`;
-
     const idLabel = p.jifuId !== '—' ? ` <span class="p-id">#${p.jifuId}</span>` : '';
     const fbLink = p.fb && !p.fb.includes('BRAK') ? p.fb : '';
     const nameHtml = fbLink ? `<a href="${fbLink}" target="_blank" rel="noopener" title="Otworz Facebook">${p.name}</a>` : p.name;
-    html += `<td><div class="p-name">${nameHtml}${idLabel}</div><div class="p-meta">${p.sponsor}</div></td>`;
-
-    html += `<td class="day-num ${dayColorCls}">${p.currentDay}<div class="day-small">/ ${TOTAL_DAYS}</div></td>`;
-
+    html += `<td class="col-osoba"><div class="p-name">${nameHtml}${idLabel}</div><div class="p-meta">${p.sponsor}</div></td>`;
+    html += `<td class="col-day day-num ${dayColorCls}">${p.currentDay}<div class="day-small">/ ${TOTAL_DAYS}</div></td>`;
     const cycleMarks = [28, 56, 84].map(d => {
       const leftPct = (d / TOTAL_DAYS) * 100;
       return `<div class="cycle-mark" style="left:${leftPct}%"></div><div class="cycle-label" style="left:${leftPct}%">${d}</div>`;
     }).join('');
-    html += `<td class="progress-wrap"><div class="progress-outer"><div class="progress-inner ${pgCls}" style="width:${pct}%"></div>${cycleMarks}</div><div class="progress-label"><span>0</span><span>${TOTAL_DAYS}</span></div></td>`;
+    html += `<td class="col-progress progress-wrap"><div class="progress-outer"><div class="progress-inner ${pgCls}" style="width:${pct}%"></div>${cycleMarks}</div><div class="progress-label"><span>0</span><span>${TOTAL_DAYS}</span></div></td>`;
 
     for (let w = 1; w <= 5; w++) {
       const weekDay = WEEK_OFFSETS[w - 1];
@@ -564,19 +653,16 @@ function renderTimeline(allPeople) {
       else if (p.currentDay < weekDay) { iconCls = 'ws-future'; iconTxt = '·'; }
       else if (status === 'exists') { iconCls = 'ws-pending'; iconTxt = w; }
       else { iconCls = 'ws-missing'; iconTxt = '—'; }
-      html += `<td class="ws"><span class="ws-icon ${iconCls}" title="WEEK ${w} (dzien ${weekDay})">${iconTxt}</span></td>`;
+      html += `<td class="col-w ws"><span class="ws-icon ${iconCls}" title="WEEK ${w} (dzien ${weekDay})">${iconTxt}</span></td>`;
     }
-
-    html += `<td class="signup-cell">${fmtDate(p.signupDate)}</td>`;
+    html += `<td class="col-signup signup-cell">Signup: <span class="signup-inline">${fmtDate(p.signupDate)}</span></td>`;
     html += '</tr>';
   }
-
   html += '</tbody></table></div>';
   document.getElementById('content').innerHTML = html;
 }
 
 // ── Main ───────────────────────────────────────────────────────────────
-
 let cachedPeople = [];
 
 async function loadTimeline() {
@@ -586,7 +672,7 @@ async function loadTimeline() {
     cachedPeople = buildPeopleFromEvents(events);
     renderTimeline(cachedPeople);
   } catch (e) {
-    document.getElementById('content').innerHTML = '<div class="error"><strong>Blad:</strong> ' + e.message + '<br><br><span style="font-weight:500;font-size:0.78rem;color:#7f1d1d;">Sprawdz: (1) kalendarz LEG #2 jest publiczny; (2) klucz API jest aktywny i ma uprawnienia do Calendar API; (3) HTTP referer restrictions pozwala na ta domene.</span></div>';
+    document.getElementById('content').innerHTML = '<div class="error"><strong>Blad:</strong> ' + e.message + '<br><br><span style="font-weight:500;font-size:0.78rem;opacity:0.85;">Sprawdz: (1) kalendarz LEG #2 jest publiczny; (2) klucz API jest aktywny i ma uprawnienia do Calendar API; (3) HTTP referer restrictions pozwala na ta domene.</span></div>';
   }
 }
 
@@ -594,11 +680,16 @@ document.getElementById('filterStatus').addEventListener('change', () => renderT
 document.getElementById('sortBy').addEventListener('change', () => renderTimeline(cachedPeople));
 
 // ── PNG export ─────────────────────────────────────────────────────────
-
 function downloadPNG() {
   const btn = document.getElementById('btnDownload');
-  btn.textContent = '⏳ Generuję...';
+  const origTxt = btn.textContent;
+  btn.textContent = '⏳ ...';
   btn.disabled = true;
+
+  const isDark = document.body.classList.contains('dark');
+  const C = isDark
+    ? { bg:'#0a0e17', card:'#131a2b', text:'#e2e8f0', muted:'#94a3b8', dim:'#64748b', border:'#1e293b', thead:'#1a2236', accent:'#f0b90b' }
+    : { bg:'#f8fafc', card:'#ffffff', text:'#1e293b', muted:'#64748b', dim:'#94a3b8', border:'#e2e8f0', thead:'#f1f5f9', accent:'#2563eb' };
 
   const people = [...cachedPeople].filter(p => p.currentDay >= 0 && p.currentDay <= 90);
   people.sort((a, b) => a.currentDay - b.currentDay);
@@ -611,33 +702,23 @@ function downloadPNG() {
   const LEGEND_H = 44;
   const TABLE_HEAD_H = 36;
   const FOOTER_H = 50;
-
   const eMap = {};
   for (const p of people) { const sp = p.sponsor !== '—' ? p.sponsor : '?'; eMap[sp] = (eMap[sp]||0)+1; }
   const eSorted = Object.entries(eMap).sort((a,b) => b[1]-a[1]);
   const eRows = Math.ceil(eSorted.length / 4);
-
   const total = people.length;
   const quit = people.filter(p => p.hasQuit).length;
   const active = total - quit;
-
   const H = HEADER_H + STATS_H + (eRows * 32 + 40) + LEGEND_H + TABLE_HEAD_H + people.length * ROW_H + FOOTER_H + 20;
-
   const canvas = document.createElement('canvas');
-  canvas.width = W * 2;
-  canvas.height = H * 2;
+  canvas.width = W * 2; canvas.height = H * 2;
   const c = canvas.getContext('2d');
   c.scale(2, 2);
-
   const font = (w, s) => c.font = `${w} ${s}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
   function roundRect(x, y, w, h, r) {
-    c.beginPath();
-    c.moveTo(x+r, y);
-    c.arcTo(x+w, y, x+w, y+h, r);
-    c.arcTo(x+w, y+h, x, y+h, r);
-    c.arcTo(x, y+h, x, y, r);
-    c.arcTo(x, y, x+w, y, r);
-    c.closePath();
+    c.beginPath(); c.moveTo(x+r, y);
+    c.arcTo(x+w, y, x+w, y+h, r); c.arcTo(x+w, y+h, x, y+h, r);
+    c.arcTo(x, y+h, x, y, r); c.arcTo(x, y, x+w, y, r); c.closePath();
   }
   function shortName(full) {
     const parts = full.trim().split(/\s+/);
@@ -646,160 +727,96 @@ function downloadPNG() {
     if (last.includes('-')) last = last.split('-').pop();
     return parts[0][0] + '.' + last;
   }
-
-  c.fillStyle = '#f8fafc';
-  c.fillRect(0, 0, W, H);
-
-  c.fillStyle = '#ffffff';
-  c.fillRect(0, 0, W, HEADER_H);
-  c.fillStyle = '#e2e8f0';
-  c.fillRect(0, HEADER_H - 1, W, 1);
-
-  font('800', 28);
-  c.fillStyle = '#1e293b';
-  c.fillText('Timeline 2.0', PAD, 42);
-
-  font('500', 13);
-  c.fillStyle = '#64748b';
-  c.fillText('LEG #2 HARD ONBOARD | Calendar-Driven | Cykl 90d', PAD, 64);
-
+  c.fillStyle = C.bg; c.fillRect(0, 0, W, H);
+  c.fillStyle = C.card; c.fillRect(0, 0, W, HEADER_H);
+  c.fillStyle = C.border; c.fillRect(0, HEADER_H - 1, W, 1);
+  font('800', 28); c.fillStyle = C.text; c.fillText('Timeline 2.0', PAD, 42);
+  font('500', 13); c.fillStyle = C.muted; c.fillText('LEG #2 HARD ONBOARD | Calendar-Driven | Cykl 90d', PAD, 64);
   const today = new Date();
   const months = ['STY','LUT','MAR','KWI','MAJ','CZE','LIP','SIE','WRZ','PAŹ','LIS','GRU'];
   const dateStr = today.getDate() + ' ' + months[today.getMonth()] + ' ' + today.getFullYear();
-  font('700', 14);
-  c.fillStyle = '#2563eb';
-  c.textAlign = 'right';
-  c.fillText(dateStr, W - PAD, 42);
-  c.textAlign = 'left';
+  font('700', 14); c.fillStyle = C.accent; c.textAlign = 'right'; c.fillText(dateStr, W - PAD, 42); c.textAlign = 'left';
 
   let sy = HEADER_H + 16;
   const statW = (W - PAD * 2 - 24) / 3;
   const statsData = [
-    { num: total, label: 'OSÓB', color: '#2563eb' },
+    { num: total, label: 'OSÓB', color: C.accent },
     { num: active, label: 'AKTYWNI', color: '#16a34a' },
     { num: quit, label: 'QUIT', color: '#dc2626' }
   ];
   statsData.forEach((s, i) => {
     const sx = PAD + i * (statW + 12);
     roundRect(sx, sy, statW, 58, 12);
-    c.fillStyle = '#ffffff';
-    c.fill();
-    c.strokeStyle = '#e2e8f0';
-    c.lineWidth = 1;
-    c.stroke();
-    font('900', 28);
-    c.fillStyle = s.color;
-    c.textAlign = 'center';
+    c.fillStyle = C.card; c.fill();
+    c.strokeStyle = C.border; c.lineWidth = 1; c.stroke();
+    font('900', 28); c.fillStyle = s.color; c.textAlign = 'center';
     c.fillText(s.num, sx + statW/2, sy + 30);
-    font('700', 10);
-    c.fillStyle = '#94a3b8';
-    c.fillText(s.label, sx + statW/2, sy + 48);
+    font('700', 10); c.fillStyle = C.dim; c.fillText(s.label, sx + statW/2, sy + 48);
   });
   c.textAlign = 'left';
 
   let ey = sy + STATS_H;
-  font('700', 11);
-  c.fillStyle = '#64748b';
-  c.fillText('TOP ENROLLERS', PAD, ey + 4);
+  font('700', 11); c.fillStyle = C.muted; c.fillText('TOP ENROLLERS', PAD, ey + 4);
   ey += 14;
-
   const chipW = (W - PAD * 2 - 36) / 4;
   eSorted.forEach(([name, count], i) => {
-    const col = i % 4;
-    const row = Math.floor(i / 4);
-    const cx = PAD + col * (chipW + 12);
-    const cy = ey + row * 30;
-    roundRect(cx, cy, chipW, 24, 8);
-    c.fillStyle = '#f1f5f9';
-    c.fill();
-    font('800', 13);
-    c.fillStyle = '#2563eb';
-    c.fillText(count, cx + 8, cy + 17);
-    font('600', 12);
-    c.fillStyle = '#1e293b';
-    c.fillText(shortName(name), cx + 28, cy + 17);
+    const col = i % 4; const row = Math.floor(i / 4);
+    const cx = PAD + col * (chipW + 12); const cy = ey + row * 30;
+    roundRect(cx, cy, chipW, 24, 8); c.fillStyle = C.thead; c.fill();
+    font('800', 13); c.fillStyle = C.accent; c.fillText(count, cx + 8, cy + 17);
+    font('600', 12); c.fillStyle = C.text; c.fillText(shortName(name), cx + 28, cy + 17);
   });
 
   let ly = ey + eRows * 30 + 16;
   const legends = [
-    { bg: '#dcfce7', fg: '#16a34a', txt: '✅', label: 'Odpisał/a' },
-    { bg: '#dbeafe', fg: '#2563eb', txt: '📝', label: 'Wysłano' },
-    { bg: '#f1f5f9', fg: '#94a3b8', txt: '—', label: 'Czeka' },
-    { bg: '#fecaca', fg: '#dc2626', txt: '❌', label: 'Quit' },
-    { bg: '#f8fafc', fg: '#cbd5e1', txt: '·', label: 'Przyszły', border: '#e2e8f0' }
+    { bg: isDark?'#14532d':'#dcfce7', fg: isDark?'#4ade80':'#16a34a', txt: '✅', label: 'Odpisał/a' },
+    { bg: isDark?'#1e3a5f':'#dbeafe', fg: isDark?'#60a5fa':'#2563eb', txt: '📝', label: 'Wysłano' },
+    { bg: C.thead, fg: C.dim, txt: '—', label: 'Czeka' },
+    { bg: isDark?'#7f1d1d':'#fecaca', fg: isDark?'#fca5a5':'#dc2626', txt: '❌', label: 'Quit' },
+    { bg: C.bg, fg: C.dim, txt: '·', label: 'Przyszły', border: C.border }
   ];
   let lx = PAD;
   legends.forEach(l => {
-    roundRect(lx, ly, 20, 20, 5);
-    c.fillStyle = l.bg;
-    c.fill();
+    roundRect(lx, ly, 20, 20, 5); c.fillStyle = l.bg; c.fill();
     if (l.border) { c.strokeStyle = l.border; c.lineWidth = 1; c.stroke(); }
-    font('700', 10);
-    c.fillStyle = l.fg;
-    c.textAlign = 'center';
-    c.fillText(l.txt, lx + 10, ly + 15);
-    c.textAlign = 'left';
-    font('500', 11);
-    c.fillStyle = '#64748b';
-    c.fillText(l.label, lx + 24, ly + 15);
+    font('700', 10); c.fillStyle = l.fg; c.textAlign = 'center'; c.fillText(l.txt, lx + 10, ly + 15);
+    c.textAlign = 'left'; font('500', 11); c.fillStyle = C.muted; c.fillText(l.label, lx + 24, ly + 15);
     lx += c.measureText(l.label).width + 44;
   });
 
   let ty = ly + LEGEND_H;
-  c.fillStyle = '#f1f5f9';
-  c.fillRect(PAD, ty, W - PAD*2, TABLE_HEAD_H);
-  font('700', 10);
-  c.fillStyle = '#64748b';
+  c.fillStyle = C.thead; c.fillRect(PAD, ty, W - PAD*2, TABLE_HEAD_H);
+  font('700', 10); c.fillStyle = C.muted;
   const cols = { day: PAD + 8, name: PAD + 70, progress: PAD + 460, w1: PAD + 680, w2: PAD + 730, w3: PAD + 780, w4: PAD + 830, w5: PAD + 880, signup: PAD + 940 };
-  c.fillText('DZIEŃ', cols.day, ty + 22);
-  c.fillText('OSOBA', cols.name, ty + 22);
+  c.fillText('DZIEŃ', cols.day, ty + 22); c.fillText('OSOBA', cols.name, ty + 22);
   c.fillText('PROGRESS', cols.progress, ty + 22);
-  c.fillText('W1', cols.w1, ty + 22);
-  c.fillText('W2', cols.w2, ty + 22);
-  c.fillText('W3', cols.w3, ty + 22);
-  c.fillText('W4', cols.w4, ty + 22);
-  c.fillText('W5', cols.w5, ty + 22);
-  c.fillText('SIGNUP', cols.signup, ty + 22);
+  c.fillText('W1', cols.w1, ty + 22); c.fillText('W2', cols.w2, ty + 22);
+  c.fillText('W3', cols.w3, ty + 22); c.fillText('W4', cols.w4, ty + 22);
+  c.fillText('W5', cols.w5, ty + 22); c.fillText('SIGNUP', cols.signup, ty + 22);
 
   let ry = ty + TABLE_HEAD_H;
   for (const p of people) {
     const alpha = p.hasQuit ? 0.4 : 1;
     c.globalAlpha = alpha;
-
-    c.fillStyle = '#f1f5f9';
-    c.fillRect(PAD, ry + ROW_H - 1, W - PAD*2, 1);
-
+    c.fillStyle = C.border; c.fillRect(PAD, ry + ROW_H - 1, W - PAD*2, 1);
     let dayColor = '#16a34a';
-    if (p.hasQuit) dayColor = '#94a3b8';
+    if (p.hasQuit) dayColor = C.dim;
     else if (p.currentDay > 60) dayColor = '#dc2626';
     else if (p.currentDay > 30) dayColor = '#d97706';
-    font('800', 22);
-    c.fillStyle = dayColor;
-    c.textAlign = 'center';
+    font('800', 22); c.fillStyle = dayColor; c.textAlign = 'center';
     c.fillText(p.currentDay, cols.day + 24, ry + 28);
-    font('500', 9);
-    c.fillStyle = '#94a3b8';
-    c.fillText('/ 90', cols.day + 24, ry + 42);
+    font('500', 9); c.fillStyle = C.dim; c.fillText('/ 90', cols.day + 24, ry + 42);
     c.textAlign = 'left';
-
-    font('700', 15);
-    c.fillStyle = '#1e293b';
+    font('700', 15); c.fillStyle = C.text;
     const nameText = p.jifuId !== '—' ? p.name + ' #' + p.jifuId : p.name;
     c.fillText(nameText, cols.name, ry + 24);
-    font('500', 11);
-    c.fillStyle = '#64748b';
-    c.fillText(p.sponsor, cols.name, ry + 42);
-
+    font('500', 11); c.fillStyle = C.muted; c.fillText(p.sponsor, cols.name, ry + 42);
     const pct = Math.min(100, Math.round((p.currentDay / 90) * 100));
-    const barW = 190;
-    const barH = 10;
-    const barY = ry + 20;
-    roundRect(cols.progress, barY, barW, barH, 5);
-    c.fillStyle = '#e2e8f0';
-    c.fill();
+    const barW = 190; const barH = 10; const barY = ry + 20;
+    roundRect(cols.progress, barY, barW, barH, 5); c.fillStyle = C.border; c.fill();
     if (pct > 0) {
       roundRect(cols.progress, barY, barW * pct / 100, barH, 5);
-      if (p.hasQuit) c.fillStyle = '#94a3b8';
+      if (p.hasQuit) c.fillStyle = C.dim;
       else if (p.currentDay > 60) c.fillStyle = '#dc2626';
       else if (p.currentDay > 30) c.fillStyle = '#d97706';
       else c.fillStyle = '#16a34a';
@@ -807,63 +824,43 @@ function downloadPNG() {
     }
     [28, 56, 84].forEach(d => {
       const mx = cols.progress + (d / 90) * barW;
-      c.fillStyle = '#94a3b8';
-      c.globalAlpha = alpha * 0.4;
-      c.fillRect(mx, barY - 2, 1.5, barH + 4);
-      c.globalAlpha = alpha;
+      c.fillStyle = C.dim; c.globalAlpha = alpha * 0.4;
+      c.fillRect(mx, barY - 2, 1.5, barH + 4); c.globalAlpha = alpha;
     });
-
     const weekCols = [cols.w1, cols.w2, cols.w3, cols.w4, cols.w5];
     const weekOffsets = [7, 14, 21, 30, 35];
     for (let w = 0; w < 5; w++) {
       const st = p.weeks[w + 1] || 'none';
       let bg, fg, txt;
-      if (st === 'replied') { bg = '#dcfce7'; fg = '#16a34a'; txt = '✅'; }
-      else if (st === 'sent') { bg = '#dbeafe'; fg = '#2563eb'; txt = '📝'; }
-      else if (st === 'quit') { bg = '#fecaca'; fg = '#dc2626'; txt = '❌'; }
-      else if (p.currentDay < weekOffsets[w]) { bg = '#f8fafc'; fg = '#e2e8f0'; txt = '·'; }
-      else if (st === 'exists') { bg = '#f1f5f9'; fg = '#94a3b8'; txt = String(w + 1); }
-      else { bg = '#f1f5f9'; fg = '#cbd5e1'; txt = '—'; }
-      roundRect(weekCols[w], ry + 12, 28, 28, 7);
-      c.fillStyle = bg;
-      c.fill();
+      if (st === 'replied') { bg = isDark?'#14532d':'#dcfce7'; fg = isDark?'#4ade80':'#16a34a'; txt = '✅'; }
+      else if (st === 'sent') { bg = isDark?'#1e3a5f':'#dbeafe'; fg = isDark?'#60a5fa':'#2563eb'; txt = '📝'; }
+      else if (st === 'quit') { bg = isDark?'#7f1d1d':'#fecaca'; fg = isDark?'#fca5a5':'#dc2626'; txt = '❌'; }
+      else if (p.currentDay < weekOffsets[w]) { bg = C.bg; fg = C.dim; txt = '·'; }
+      else if (st === 'exists') { bg = C.thead; fg = C.dim; txt = String(w + 1); }
+      else { bg = C.thead; fg = C.dim; txt = '—'; }
+      roundRect(weekCols[w], ry + 12, 28, 28, 7); c.fillStyle = bg; c.fill();
       if (p.currentDay < weekOffsets[w] && st === 'none') {
-        c.strokeStyle = '#e2e8f0'; c.lineWidth = 1; c.stroke();
+        c.strokeStyle = C.border; c.lineWidth = 1; c.stroke();
       }
-      font('700', 12);
-      c.fillStyle = fg;
-      c.textAlign = 'center';
-      c.fillText(txt, weekCols[w] + 14, ry + 31);
-      c.textAlign = 'left';
+      font('700', 12); c.fillStyle = fg; c.textAlign = 'center';
+      c.fillText(txt, weekCols[w] + 14, ry + 31); c.textAlign = 'left';
     }
-
-    font('500', 11);
-    c.fillStyle = '#64748b';
+    font('500', 11); c.fillStyle = C.muted;
     const sd = p.signupDate;
     const sdm = sd && sd !== '—' ? sd.match(/\d{4}-(\d{2})-(\d{2})/) : null;
     c.fillText(sdm ? sdm[2] + '.' + sdm[1] : '—', cols.signup, ry + 30);
-
     c.globalAlpha = 1;
     ry += ROW_H;
   }
-
-  c.fillStyle = '#e2e8f0';
-  c.fillRect(PAD, ry + 8, W - PAD*2, 1);
-  font('500', 11);
-  c.fillStyle = '#94a3b8';
-  c.textAlign = 'center';
-  c.fillText('Take Profit Crew — Timeline System', W/2, ry + 30);
-  c.textAlign = 'left';
+  c.fillStyle = C.border; c.fillRect(PAD, ry + 8, W - PAD*2, 1);
+  font('500', 11); c.fillStyle = C.dim; c.textAlign = 'center';
+  c.fillText('Take Profit Crew — Timeline System', W/2, ry + 30); c.textAlign = 'left';
 
   const a = document.createElement('a');
   a.download = 'timeline-prawa-noga-' + new Date().toISOString().split('T')[0] + '.png';
   a.href = canvas.toDataURL('image/png');
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-
-  btn.textContent = '⬇ Pobierz PNG';
-  btn.disabled = false;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  btn.textContent = origTxt; btn.disabled = false;
 }
 
 loadTimeline();
