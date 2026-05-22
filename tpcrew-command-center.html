@@ -59,9 +59,9 @@ th.c,td.c{text-align:center}
 .thm{background:var(--card);border:1px solid var(--brd);border-radius:20px;padding:5px 14px;color:var(--txt);font-size:.75em;cursor:pointer;transition:all .2s;margin-left:8px}
 .thm:hover{border-color:var(--gold);color:var(--gold)}
 .st-click{transition:all .2s;position:relative}.st-click:hover{border-color:var(--red);transform:scale(1.05);box-shadow:0 0 12px rgba(248,113,113,.25)}.st-click::after{content:"filtruj";position:absolute;bottom:3px;left:50%;transform:translateX(-50%);font-size:.5em;color:var(--dim);letter-spacing:.5px;text-transform:uppercase;opacity:0;transition:opacity .2s}.st-click:hover::after{opacity:1}.st-on{border-color:var(--red);box-shadow:0 0 12px rgba(248,113,113,.3);background:var(--tg-r-bg)}.st-on::after{content:"aktywny";opacity:1;color:var(--red)}
-.fbtn{background:var(--card);border:1px solid var(--brd);border-radius:20px;padding:6px 16px;color:var(--dim);font-size:.75em;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit;letter-spacing:.3px}
-.fbtn:hover{border-color:var(--gold);color:var(--gold)}
-.fbtn.active{background:var(--gold);color:var(--bg);border-color:var(--gold)}
+.asyst-select{background:var(--card);border:1px solid var(--brd);border-radius:10px;padding:10px 36px 10px 14px;color:var(--txt);font-size:.82em;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit;letter-spacing:.3px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='2' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;width:100%;max-width:320px}
+.asyst-select:focus{border-color:var(--gold);outline:none}
+.asyst-select option{background:var(--card);color:var(--txt);padding:8px}
 
 @media(max-width:700px){
 body{padding:10px 8px}
@@ -71,7 +71,7 @@ body{padding:10px 8px}
 .st{min-width:calc(33.3% - 6px);padding:8px 4px}
 .st .n{font-size:1.1em}
 .st .l{font-size:.55em}
-.fbtn{padding:5px 10px;font-size:.68em}
+.asyst-select{max-width:100%;font-size:.78em}
 .srch{font-size:.8em;padding:8px 10px}
 .sh .t{font-size:.73em}
 table,thead,tbody,th,tr{display:block}
@@ -107,8 +107,8 @@ td:nth-child(7){position:absolute;top:14px;right:12px}
   <div style="display:flex;align-items:center;gap:6px"><div class="badge">LIVE</div><button class="thm" id="thm" onclick="toggleTheme()">LIGHT</button></div>
 </div>
 <div class="sts" id="sts"></div>
-<div style="display:flex;gap:8px;margin:0 0 10px;align-items:center;flex-wrap:wrap">
-<div id="filters" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+<div style="margin:0 0 10px">
+<div id="filters"></div>
 </div>
 <input class="srch" placeholder="Szukaj po imieniu, nazwisku lub enrollerze..." oninput="flt(this.value)">
 <div id="app"><div class="ld">Ladowanie danych z Google Sheets...</div></div>
@@ -205,14 +205,32 @@ function computeAndRender(){
 
 function renderAll(){var d=computeAndRender();render(d.total,d.active,d.bezKons,d.S);}
 
+var ASYST_NAMES={
+  'AB':'Adrian Bilinski','AK':'Amelia Kalinowska','AM':'AM',
+  'PB':'Paula Bilinska','FR':'Franciszek Rumak','KT':'Krystian Toporek',
+  'MK':'Martyna Kopczynska','MZ':'Maksym Zaremba',
+  'UP':'Urszula Pawelczyk','LP':'Lukasz Pawelczyk',
+  'WNUKI':'Kuba Wnuk','WNUKI2':'Mikolaj Wnuk'
+};
+
 function buildFilters(){
   var fl=document.getElementById('filters');
   var names=Object.keys(ASYST_SET).sort();
-  fl.innerHTML='<button class="fbtn active" onclick="clearFilter(this)">WSZYSCY ('+VISIBLE_COUNT+')</button>'+
-    names.map(function(n){return'<button class="fbtn" onclick="setFilter(\''+n.toLowerCase().replace(/'/g,"\\'")+'\',this)">'+esc(n)+' ('+(ASYST_COUNT[n]||0)+')</button>';}).join('');
+  var opts='<option value="">WYBIERZ ASYSTENTA ('+VISIBLE_COUNT+')</option>';
+  names.forEach(function(n){
+    var cnt=ASYST_COUNT[n]||0;
+    if(n==='WNUKI'){
+      opts+='<option value="wnuki">Kuba Wnuk ('+cnt+')</option>';
+      opts+='<option value="wnuki">Mikolaj Wnuk ('+cnt+')</option>';
+    } else {
+      var label=ASYST_NAMES[n]||n;
+      opts+='<option value="'+n.toLowerCase()+'">'+esc(label)+' ('+cnt+')</option>';
+    }
+  });
+  fl.innerHTML='<select class="asyst-select" id="asyst-sel" onchange="selectFilter(this.value)">'+opts+'</select>';
 }
 
-function clearFilter(btn){activeFilter='';document.querySelectorAll('.fbtn').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');renderAll();}
+function selectFilter(val){activeFilter=val;renderAll();}
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function stag(v){var n=parseInt(v);if(isNaN(n))return'<span class="tg nn">'+(esc(v)||'-')+'</span>';if(n>=14)return'<span class="tg g">'+n+'d</span>';if(n>=1)return'<span class="tg y">'+n+'d</span>';if(n===0)return'<span class="tg y">DZIS</span>';return'<span class="tg rd">'+n+'d</span>';}
 function dtag(v){var n=parseInt(v);if(isNaN(n))return'<span class="tg nn">-</span>';return'<span class="tg bl">'+n+'d</span>';}
@@ -284,10 +302,10 @@ function toggleBezKons(){filterBezKons=!filterBezKons;renderAll();}
 
 var activeFilter='';
 function flt(q){q=q.toLowerCase().trim();document.querySelectorAll('tr[data-q]').forEach(function(r){r.style.display=!q||r.dataset.q.includes(q)?'':'none';});}
-function setFilter(name,btn){
-  document.querySelectorAll('.fbtn').forEach(function(b){b.classList.remove('active');});
-  if(activeFilter===name){activeFilter='';document.querySelector('.fbtn').classList.add('active');}
-  else{activeFilter=name;btn.classList.add('active');}
+function setFilter(name){
+  activeFilter=name||'';
+  var sel=document.getElementById('asyst-sel');
+  if(sel)sel.value=activeFilter;
   renderAll();
 }
 
