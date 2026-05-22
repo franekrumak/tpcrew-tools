@@ -179,7 +179,7 @@ function matchFilter(p){if(!activeFilter)return true;return p.asyst.toLowerCase(
 function isBezKons(p){var isDate=/^\d{2}\/\d{2}\/\d{4}$/.test(p.nKd);return p.sect!==null&&p.sect>=0&&p.sect<=28&&!isDate&&p.nKd!=='-';}
 
 function computeAndRender(){
-  var S={nowe:[],wczoraj:[],nieprze:[],dzis:[],tydz:[],quit:[]};
+  var S={nowe:[],wczoraj:[],nieprze:[],dzis:[],tydz:[],quit:[],bezKonsList:[]};
   var active=0,total=0,bezKons=0;
   ALL.forEach(function(p){
     if(!matchFilter(p))return;
@@ -188,7 +188,7 @@ function computeAndRender(){
     total++;
     var sect=p.sect;var dniTPC=p.dniTPCn;
     var isDate=/^\d{2}\/\d{2}\/\d{4}$/.test(p.nKd);
-    if(sect!==null&&sect>=0&&sect<=28){active++;if(!isDate&&p.nKd!=='-')bezKons++;}
+    if(sect!==null&&sect>=0&&sect<=28){active++;if(!isDate&&p.nKd!=='-'){bezKons++;S.bezKonsList.push(p);}}
     if(dniTPC!==null&&dniTPC<=7)S.nowe.push(p);
     if(sect===27)S.wczoraj.push(p);
     if(sect!==null&&sect>=-7&&sect<=-1)S.nieprze.push(p);
@@ -295,7 +295,8 @@ function render(total,active,bezKons,S){
     rsec('dzis','&#9200;','Dzisiejsze przedluzenia (&#167; = 0)',S.dzis,false,'#fbbf24')+
     rsec('tydz','&#128197;','W tym tygodniu przedluzenia (&#167; 1-7)',S.tydz,false,'#d4a017')+
     rsec('nieprze','&#128680;','Kto nie przedluzyl a powinien (&#167; -1 do -7)',S.nieprze,false,'#f87171')+
-    rsec('quit','&#128164;','Quit / Przerwa (&#167; -7 do -30)',S.quit,false,'#888');
+    rsec('quit','&#128164;','Quit / Przerwa (&#167; -7 do -30)',S.quit,false,'#888')+
+    rsec('bezkons','&#9888;','UWAGA — OSOBY BEZ KONSULTACJI',S.bezKonsList,false,'#f87171');
 }
 
 var filterBezKons=false;
