@@ -216,8 +216,9 @@ var ASYST_NAMES={
 function buildFilters(){
   var fl=document.getElementById('filters');
   var names=Object.keys(ASYST_SET).sort();
-  var opts='<option value="">WYBIERZ ASYSTENTA ('+VISIBLE_COUNT+')</option>';
+  var opts='<option value="" disabled selected>WYBIERZ ASYSTENTA</option><option value="">Wszyscy ('+VISIBLE_COUNT+')</option>';
   names.forEach(function(n){
+    if(n==='-'||n==='?')return;
     var cnt=ASYST_COUNT[n]||0;
     if(n==='WNUKI'){
       opts+='<option value="wnuki">Kuba Wnuk ('+cnt+')</option>';
@@ -289,11 +290,11 @@ function render(total,active,bezKons,S){
     '<div class="st"><div class="n" style="color:var(--red)">'+S.nieprze.length+'</div><div class="l">Nie przedluzyli</div></div>'+
     '<div class="st st-click'+(filterBezKons?' st-on':'')+'" style="cursor:pointer" onclick="toggleBezKons()"><div class="n" style="color:var(--red)">'+bezKons+'</div><div class="l">Bez konsultacji</div></div>';
   document.getElementById('app').innerHTML=
-    rsec('nowe','&#10024;','Nowe osoby (7 dni w TPC lub mniej)',S.nowe,true,'#60a5fa')+
-    rsec('wczoraj','&#9989;','Wczoraj przedluzyli (&#167; = 27)',S.wczoraj,true,'#4ade80')+
-    rsec('dzis','&#9200;','Dzisiejsze przedluzenia (&#167; = 0)',S.dzis,true,'#fbbf24')+
-    rsec('tydz','&#128197;','W tym tygodniu przedluzenia (&#167; 1-7)',S.tydz,true,'#d4a017')+
-    rsec('nieprze','&#128680;','Kto nie przedluzyl a powinien (&#167; -1 do -7)',S.nieprze,true,'#f87171')+
+    rsec('nowe','&#10024;','Nowe osoby (7 dni w TPC lub mniej)',S.nowe,false,'#60a5fa')+
+    rsec('wczoraj','&#9989;','Wczoraj przedluzyli (&#167; = 27)',S.wczoraj,false,'#4ade80')+
+    rsec('dzis','&#9200;','Dzisiejsze przedluzenia (&#167; = 0)',S.dzis,false,'#fbbf24')+
+    rsec('tydz','&#128197;','W tym tygodniu przedluzenia (&#167; 1-7)',S.tydz,false,'#d4a017')+
+    rsec('nieprze','&#128680;','Kto nie przedluzyl a powinien (&#167; -1 do -7)',S.nieprze,false,'#f87171')+
     rsec('quit','&#128164;','Quit / Przerwa (&#167; -7 do -30)',S.quit,false,'#888');
 }
 
