@@ -189,9 +189,32 @@ body.dark .enroller-bar-fill { background: linear-gradient(90deg, #f5d565, #d4a0
   .stat-num { font-size: 1.25rem; }
 
   .summary-panel { padding: 8px 14px 4px; }
-  .enroller-grid { column-count: 2; column-gap: 10px; }
-  .enroller-name { min-width: 0; font-size: 0.66rem; }
-  .enroller-count { font-size: 0.66rem; min-width: 14px; }
+  /* Enrollers in mobile: 1 column, aligned grid so name | count | bar are all in the same vertical lines */
+  .enroller-grid {
+    column-count: 1;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+  .enroller-row {
+    display: grid;
+    grid-template-columns: 105px 22px 1fr;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 0;
+  }
+  .enroller-name {
+    min-width: 0;
+    font-size: 0.7rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .enroller-count {
+    font-size: 0.72rem;
+    min-width: 0;
+    text-align: right;
+  }
+  .enroller-bar-wrap { height: 8px; }
 
   .legend { padding: 8px 14px; gap: 10px; }
   .legend-item { font-size: 0.62rem; }
@@ -211,43 +234,37 @@ body.dark .enroller-bar-fill { background: linear-gradient(90deg, #f5d565, #d4a0
   tbody tr:hover { background: var(--card); }
   td { padding: 0; border: none; }
 
-  /* Card column-1: name + meta — full width minus day number on right */
-  td.col-osoba { padding-right: 60px; margin-bottom: 8px; }
+  /* Card column-1: name + meta — full width minus day/signup column on right */
+  td.col-osoba { padding-right: 72px; margin-bottom: 8px; }
   .p-name { font-size: 0.95rem; line-height: 1.2; }
   .p-meta { font-size: 0.72rem; margin-top: 2px; }
   .p-id { font-size: 0.75rem; }
 
-  /* Day number — pinned top-right */
+  /* Signup — small badge in top-right corner, ABOVE day number */
+  td.col-signup {
+    position: absolute; top: 10px; right: 12px;
+    font-size: 0.66rem; color: var(--muted);
+    font-weight: 600; text-align: right;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .signup-inline { font-weight: 700; color: var(--text); }
+
+  /* Day number — pinned top-right, BELOW signup */
   td.col-day {
-    position: absolute; top: 12px; right: 12px;
+    position: absolute; top: 26px; right: 12px;
     min-width: 0; text-align: right;
   }
   .day-num { font-size: 1.55rem; line-height: 1; min-width: 0; }
   .day-small { font-size: 0.62rem; }
 
   /* Progress — full width */
-  td.col-progress { min-width: 0; max-width: none; margin-bottom: 8px; }
+  td.col-progress { min-width: 0; max-width: none; margin-bottom: 8px; margin-top: 4px; }
   .progress-outer { height: 10px; }
 
   /* Week status row — flex line, full width */
-  .mobile-weeks {
-    display: flex; gap: 6px; align-items: center; margin-top: 6px;
-    flex-wrap: wrap;
-  }
-  td.col-w { display: inline-block; padding: 0; }
-  .week-label {
-    display: inline-block; font-size: 0.55rem; font-weight: 700;
-    color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px;
-    margin-right: 4px;
-  }
+  td.col-w { display: inline-block; padding: 0; margin-right: 4px; }
   .ws-icon { width: 28px; height: 28px; font-size: 0.85rem; }
-
-  /* Signup — inline next to weeks */
-  td.col-signup {
-    display: inline-block; margin-left: auto;
-    font-size: 0.72rem; color: var(--muted);
-  }
-  .signup-inline { font-weight: 700; color: var(--text); }
 }
 </style>
 </head>
