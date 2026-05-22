@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Timeline 2.0 — TPCrew</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root { color-scheme: light; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Montserrat', sans-serif; background: #f8fafc; color: #1e293b; font-size: 13px; }
+
+.header { padding: 16px 20px 14px; border-bottom: 1px solid #e2e8f0; background: #fff; }
+.header h1 { font-size: 1.15rem; font-weight: 800; color: #1e293b; letter-spacing: -0.3px; }
+.header .sub { font-size: 0.72rem; color: #64748b; margin-top: 2px; }
+.controls { display: flex; gap: 8px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
+.controls select { padding: 5px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.76rem; font-family: inherit; background: #fff; }
+.btn-refresh { padding: 5px 14px; border: none; border-radius: 8px; background: #2563eb; color: #fff; font-weight: 600; cursor: pointer; font-size: 0.76rem; font-family: inherit; }
+.btn-refresh:hover { background: #1d4ed8; }
+.stats { margin-left: auto; display: flex; gap: 12px; }
+.stat-box { text-align: center; }
+.stat-num { font-size: 1.1rem; font-weight: 800; }
+.stat-label { font-size: 0.6rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+
+.loading { text-align: center; padding: 60px 20px; color: #64748b; }
+.spinner { display: inline-block; width: 22px; height: 22px; border: 3px solid #e2e8f0; border-top-color: #2563eb; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 8px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.error { background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 14px; color: #dc2626; font-size: 0.82rem; margin: 20px; }
+
+/* Table */
+.table-wrap { padding: 12px 16px 20px; overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+thead th { background: #f1f5f9; padding: 8px 10px; text-align: left; font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #e2e8f0; white-space: nowrap; }
+thead th.center { text-align: center; }
+tbody tr { border-bottom: 1px solid #f1f5f9; transition: background 0.15s; }
+tbody tr:hover { background: #f8fafc; }
+tbody tr.quit-row { opacity: 0.45; }
+tbody tr.quit-row:hover { opacity: 0.7; }
+td { padding: 8px 10px; vertical-align: middle; }
+
+/* Person cell */
+.p-name { font-weight: 700; font-size: 0.82rem; }
+.p-meta { font-size: 0.68rem; color: #64748b; }
+.p-id { color: #94a3b8; font-weight: 500; font-size: 0.72rem; }
+
+/* Day number */
+.day-num { font-size: 1.3rem; font-weight: 800; text-align: center; min-width: 55px; }
+.day-small { font-size: 0.6rem; font-weight: 500; color: #94a3b8; }
+.day-green { color: #16a34a; }
+.day-yellow { color: #d97706; }
+.day-red { color: #dc2626; }
+.day-gray { color: #94a3b8; }
+
+/* Progress bar */
+.progress-wrap { min-width: 160px; max-width: 220px; }
+.progress-outer { background: #e2e8f0; border-radius: 6px; height: 12px; position: relative; overflow: visible; margin-bottom: 10px; }
+.progress-inner { height: 100%; border-radius: 6px; transition: width 0.3s; position: relative; z-index: 1; overflow: hidden; }
+.progress-label { font-size: 0.62rem; color: #94a3b8; margin-top: 2px; display: flex; justify-content: space-between; }
+.pg-green { background: linear-gradient(90deg, #22c55e, #16a34a); }
+.pg-yellow { background: linear-gradient(90deg, #facc15, #eab308); }
+.pg-red { background: linear-gradient(90deg, #f87171, #dc2626); }
+.pg-gray { background: #94a3b8; }
+.cycle-mark { position: absolute; top: -2px; width: 2px; height: 16px; background: #64748b; border-radius: 1px; z-index: 2; opacity: 0.5; }
+.cycle-label { position: absolute; top: 16px; font-size: 0.5rem; color: #94a3b8; transform: translateX(-50%); font-weight: 600; white-space: nowrap; }
+
+/* Week status cells */
+.ws { text-align: center; min-width: 38px; }
+.ws-icon { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; }
+.ws-pending { background: #f1f5f9; color: #94a3b8; }
+.ws-future { background: transparent; color: #e2e8f0; }
+.ws-sent { background: #dbeafe; color: #2563eb; }
+.ws-replied { background: #dcfce7; color: #16a34a; }
+.ws-quit { background: #fecaca; color: #dc2626; }
+.ws-missing { background: #f1f5f9; color: #cbd5e1; font-style: italic; }
+
+/* Clickable person name */
+.p-name a { color: inherit; text-decoration: none; }
+.p-name a:hover { text-decoration: underline; color: #2563eb; }
+
+/* Signup date */
+.signup-cell { font-size: 0.75rem; color: #64748b; white-space: nowrap; }
+
+.footer { text-align: center; color: #94a3b8; font-size: 0.68rem; padding: 12px 0 16px; border-top: 1px solid #e2e8f0; margin-top: 8px; }
+.footer a { color: #94a3b8; text-decoration: none; }
+.footer a:hover { color: #2563eb; }
+
+/* Summary panel — enroller ranking */
+.summary-panel { padding: 10px 20px 6px; }
+.enroller-grid { column-count: 2; column-gap: 16px; }
+.enroller-row { break-inside: avoid; display: flex; align-items: center; gap: 6px; }
+.enroller-count { font-size: 0.72rem; font-weight: 800; color: #2563eb; min-width: 16px; text-align: right; }
+.enroller-bar-wrap { flex: 1; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; }
+.enroller-bar-fill { height: 100%; background: linear-gradient(90deg, #3b82f6, #2563eb); border-radius: 4px; }
+.enroller-name { font-size: 0.7rem; font-weight: 600; color: #1e293b; white-space: nowrap; min-width: 80px; }
+
+/* Legend */
+.legend { display: flex; gap: 14px; padding: 10px 20px; flex-wrap: wrap; }
+.legend-item { display: flex; align-items: center; gap: 4px; font-size: 0.68rem; color: #64748b; }
+.legend-dot { width: 14px; height: 14px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.55rem; font-weight: 700; }
+
+/* Mobile mode */
+.btn-mobile { padding: 5px 14px; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; color: #1e293b; font-weight: 600; cursor: pointer; font-size: 0.76rem; font-family: inherit; }
+.btn-mobile:hover { background: #f1f5f9; }
+.btn-mobile.active { background: #1e293b; color: #fff; border-color: #1e293b; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Timeline 2.0</h1>
+  <p class="sub">LEG #2 HARD ONBOARD | Calendar-Driven | Cykl 28d (kreski na pasku)</p>
+  <div class="controls">
+    <select id="filterStatus">
+      <option value="all">Wszyscy (0-90d)</option>
+      <option value="fresh">Swiezy (0-30d)</option>
+      <option value="mid">Srodek (31-60d)</option>
+      <option value="late">Koncowka (61-90d)</option>
+    </select>
+    <select id="sortBy">
+      <option value="newest">Najnowsi</option>
+      <option value="oldest">Najstarsi</option>
+      <option value="day-desc">Dzien (malejaco)</option>
+      <option value="name">A-Z</option>
+    </select>
+    <button class="btn-refresh" onclick="loadTimeline()">Odswiez</button>
+    <button class="btn-mobile" id="btnDownload" onclick="downloadPNG()">&#x2B07; Pobierz PNG</button>
+    <div class="stats" id="statsArea"></div>
+  </div>
+</div>
+
+<div class="summary-panel" id="summaryPanel" style="display:none;">
+  <div class="enroller-grid" id="enrollerGrid"></div>
+</div>
+
+<div id="content">
+  <div class="loading"><span class="spinner"></span> Pobieram dane z kalendarza LEG #2...</div>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot ws-pending" style="font-size:0.6rem;">&mdash;</div> Do wyslania</div>
+  <div class="legend-item"><div class="legend-dot ws-sent">&#128221;</div> Wyslano</div>
+  <div class="legend-item"><div class="legend-dot ws-replied">&#9989;</div> Odpisal/a</div>
+  <div class="legend-item"><div class="legend-dot ws-quit">&#10060;</div> Quit</div>
+  <div class="legend-item"><div class="legend-dot ws-future" style="border:1px solid #e2e8f0;">&middot;</div> Przyszly</div>
+</div>
+
+<div class="footer">
+  Take Profit Crew &mdash; Timeline System | Calendar-Driven Live Dashboard
+  &nbsp;&middot;&nbsp; <a href="../">&larr; Powrot do TPCrew Tools</a>
+</div>
+
+<script>
+// =======================================================================
+// CALENDAR-DRIVEN ARCHITECTURE (GitHub Pages edition)
+// People are derived 100% from WEEK events in Google Calendar.
+// No hardcoded list — new enrollments show up automatically.
+// Data source: Google Calendar API v3 (public calendar + restricted API key).
+// =======================================================================
+
+const API_KEY = 'AIzaSyCHpZDpQ96aJWakdYXGbODs8e_H8oc3JNE';
+const LEG2_CAL = 'd749104fae9417b361e3c7a8c14e3df6a6a555738ac581c30c89f1e3122d03bc@group.calendar.google.com';
+const TOTAL_DAYS = 90;
+const WEEK_OFFSETS = [7, 14, 21, 30, 35]; // WEEK 1-5 day offsets from signup
+
+// ── Utility functions ──────────────────────────────────────────────────
+
+function todayDate() {
+  const d = new Date();
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+}
+
+function parseDate(s) {
+  if (!s) return null;
+  const m = s.match(/(\d{4})-(\d{2})-(\d{2})/);
+  return m ? new Date(parseInt(m[1]), parseInt(m[2]) - 1, parseInt(m[3])) : null;
+}
+
+function daysBetween(d1, d2) {
+  return Math.round((d2 - d1) / 86400000);
+}
+
+function fmtDate(s) {
+  if (!s) return '—';
+  const m = s.match(/(\d{4})-(\d{2})-(\d{2})/);
+  return m ? m[3] + '.' + m[2] : s;
+}
+
+// Normalize name: strip diacritics, lowercase, collapse spaces
+function normName(n) {
+  let s = n.replace(/ł/g, 'l').replace(/Ł/g, 'L');
+  return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ').trim();
+}
+
+// Levenshtein distance
+function levenshtein(a, b) {
+  const m = a.length, n = b.length;
+  const d = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+  for (let i = 0; i <= m; i++) d[i][0] = i;
+  for (let j = 0; j <= n; j++) d[0][j] = j;
+  for (let i = 1; i <= m; i++)
+    for (let j = 1; j <= n; j++)
+      d[i][j] = Math.min(d[i-1][j] + 1, d[i][j-1] + 1, d[i-1][j-1] + (a[i-1] === b[j-1] ? 0 : 1));
+  return d[m][n];
+}
+
+// Polish name aliases (diminutives <-> full names)
+const NAME_ALIASES = {
+  'kuba':'jakub','jakub':'kuba',
+  'tomek':'tomasz','tomasz':'tomek',
+  'maciek':'maciej','maciej':'maciek',
+  'bartek':'bartosz','bartosz':'bartek',
+  'darek':'dariusz','dariusz':'darek',
+  'wojtek':'wojciech','wojciech':'wojtek',
+  'krzysiek':'krzysztof','krzysztof':'krzysiek',
+  'piotrek':'piotr','piotr':'piotrek',
+  'kasia':'katarzyna','katarzyna':'kasia',
+  'ania':'anna','anna':'ania',
+  'basia':'barbara','barbara':'basia',
+  'ola':'aleksandra','aleksandra':'ola',
+  'marta':'martyna','martyna':'marta',
+};
+
+// ── Calendar data fetching (Google Calendar API v3) ────────────────────
+
+async function fetchEventsFromCal(calId) {
+  const today = new Date();
+  const from = new Date(today); from.setDate(from.getDate() - 130);
+  const to = new Date(today); to.setDate(to.getDate() + 45);
+  const timeMin = from.toISOString();
+  const timeMax = to.toISOString();
+
+  let allEvents = [];
+  let pageToken = null;
+  let safetyCounter = 0;
+  do {
+    const params = new URLSearchParams({
+      key: API_KEY,
+      timeMin: timeMin,
+      timeMax: timeMax,
+      maxResults: '250',
+      singleEvents: 'true',
+      orderBy: 'startTime'
+    });
+    if (pageToken) params.set('pageToken', pageToken);
+    const url = 'https://www.googleapis.com/calendar/v3/calendars/' + encodeURIComponent(calId) + '/events?' + params.toString();
+    const resp = await fetch(url);
+    const data = await resp.json();
+    if (data.error) {
+      throw new Error('Calendar API: ' + (data.error.message || 'unknown error'));
+    }
+    const events = data.items || [];
+    allEvents = allEvents.concat(events.map(e => ({ ...e, _calId: calId })));
+    pageToken = data.nextPageToken || null;
+    safetyCounter++;
+    if (safetyCounter > 50) break; // hard safety stop
+  } while (pageToken);
+  return allEvents;
+}
+
+async function fetchAllCalendarEvents() {
+  // Only LEG #2 — all prawa noga people have WEEK events here.
+  return await fetchEventsFromCal(LEG2_CAL);
+}
+
+// ── Event parsing & people extraction ──────────────────────────────────
+
+// WEEK event title regex — handles all format variants:
+// "✅ 1 WEEK: Name (Enroller)", "📝 2 week: ❗️Name", "3 WEEK: Name" etc.
+const WEEK_RE = /^([\u{1F4DD}✅❌⌛⏳☠️\u{1F525}❗\s]*?)(\d)\s*[Ww][Ee][Ee][Kk]:\s*(.+?)(?:\s*\((.+?)\))?\s*$/u;
+
+// Parse structured description from event body
+function parseEventDescription(desc) {
+  if (!desc) return {};
+  const meta = {};
+  // Strip HTML tags (Calendar API v3 returns HTML in description if event was created via web UI)
+  const plain = desc.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '');
+  for (const line of plain.split('\n')) {
+    const colonIdx = line.indexOf(':');
+    if (colonIdx < 0) continue;
+    const k = line.substring(0, colonIdx).trim().toLowerCase();
+    const v = line.substring(colonIdx + 1).trim();
+    if (!v || v === '—') continue;
+    if (k === 'jifu id') meta.jifuId = v;
+    else if (k === 'signup date') meta.signupDate = v;
+    else if (k === 'enroller' || k === 'sponsor') meta.sponsor = v;
+    else if (k === 'fb') meta.fb = v;
+    else if (k === 'messenger') meta.messenger = v;
+    else if (k === 'noga') meta.noga = v;
+    else if (k === 'typ') meta.typ = v;
+    else if (k === 'email jifu' || k === 'email') meta.email = v;
+    else if (k === 'email gr') meta.emailGR = v;
+    else if (k === 'kraj') meta.kraj = v;
+    else if (k === 'rv') meta.rv = v;
+  }
+  return meta;
+}
+
+// Check if two normalized names refer to the same person
+function areNamesSamePerson(key1, key2) {
+  if (key1 === key2) return true;
+  const p1 = key1.split(' '), p2 = key2.split(' ');
+  const f1 = p1[0], f2 = p2[0];
+  const l1 = p1[p1.length - 1], l2 = p2[p2.length - 1];
+
+  // First names must match or be aliases
+  const firstMatch = f1 === f2 || NAME_ALIASES[f1] === f2 || NAME_ALIASES[f2] === f1;
+  if (!firstMatch) return false;
+
+  // Last names: exact, substring (hyphenated), or Levenshtein <= 1
+  if (l1 === l2) return true;
+  if (l1.includes(l2) || l2.includes(l1)) return true;
+  if (levenshtein(l1, l2) <= 1) return true;
+  return false;
+}
+
+// Build people array entirely from calendar WEEK events
+function buildPeopleFromEvents(allEvents) {
+  const rawMap = {}; // normKey -> person data
+
+  for (const ev of allEvents) {
+    const title = ev.summary || '';
+    const m = title.match(WEEK_RE);
+    if (!m) continue;
+
+    const prefix = (m[1] || '').trim();
+    const weekNum = parseInt(m[2]);
+    let rawName = m[3].trim().replace(/❗️?/g, '').replace(/❗/g, '').trim();
+    const enrollerFromTitle = m[4] ? m[4].trim() : null;
+    const key = normName(rawName);
+
+    // Determine week status from prefix emoji
+    let weekStatus = 'exists';
+    if (prefix.includes('✅')) weekStatus = 'replied';
+    else if (prefix.includes('📝')) weekStatus = 'sent';
+    else if (prefix.includes('❌') || prefix.includes('☠️')) weekStatus = 'quit';
+    else if (prefix.includes('⌛') || prefix.includes('⏳')) weekStatus = 'paused';
+
+    // Init person entry if new
+    if (!rawMap[key]) {
+      rawMap[key] = {
+        name: rawName,
+        weeks: {},
+        hasQuit: false,
+        meta: {},
+        enrollerFromTitle: enrollerFromTitle,
+        earliestEventDate: null,
+        earliestWeekNum: null,
+        calIds: new Set()
+      };
+    }
+
+    if (ev._calId) rawMap[key].calIds.add(ev._calId);
+
+    const priority = { replied: 3, sent: 2, quit: 1, paused: 1, exists: 0 };
+    const existing = rawMap[key].weeks[weekNum];
+    if (!existing || (priority[weekStatus] || 0) > (priority[existing] || 0)) {
+      rawMap[key].weeks[weekNum] = weekStatus;
+    }
+    if (weekStatus === 'quit') rawMap[key].hasQuit = true;
+
+    const desc = ev.description || '';
+    if (desc) {
+      const meta = parseEventDescription(desc);
+      for (const [mk, mv] of Object.entries(meta)) {
+        if (!rawMap[key].meta[mk]) rawMap[key].meta[mk] = mv;
+      }
+    }
+
+    const evDate = (ev.start && (ev.start.date || ev.start.dateTime)) || null;
+    if (evDate) {
+      const parsed = parseDate(evDate);
+      if (parsed && (!rawMap[key].earliestEventDate || parsed < rawMap[key].earliestEventDate)) {
+        rawMap[key].earliestEventDate = parsed;
+        rawMap[key].earliestWeekNum = weekNum;
+      }
+    }
+
+    if (enrollerFromTitle && !rawMap[key].enrollerFromTitle) {
+      rawMap[key].enrollerFromTitle = enrollerFromTitle;
+    }
+  }
+
+  // ── Fuzzy dedup pass ──
+  const keys = Object.keys(rawMap);
+  const merged = new Set();
+
+  for (let i = 0; i < keys.length; i++) {
+    if (merged.has(keys[i])) continue;
+    for (let j = i + 1; j < keys.length; j++) {
+      if (merged.has(keys[j])) continue;
+      if (areNamesSamePerson(keys[i], keys[j])) {
+        const dst = rawMap[keys[i]], src = rawMap[keys[j]];
+        for (const [wn, ws] of Object.entries(src.weeks)) {
+          const p = { replied: 3, sent: 2, quit: 1, paused: 1, exists: 0 };
+          if (!dst.weeks[wn] || (p[ws] || 0) > (p[dst.weeks[wn]] || 0)) {
+            dst.weeks[wn] = ws;
+          }
+        }
+        if (src.hasQuit) dst.hasQuit = true;
+        for (const [mk, mv] of Object.entries(src.meta)) {
+          if (!dst.meta[mk]) dst.meta[mk] = mv;
+        }
+        if (!dst.enrollerFromTitle && src.enrollerFromTitle) {
+          dst.enrollerFromTitle = src.enrollerFromTitle;
+        }
+        for (const cid of src.calIds) dst.calIds.add(cid);
+        if (src.name.length > dst.name.length) dst.name = src.name;
+        merged.add(keys[j]);
+      }
+    }
+  }
+
+  // ── Build final people array ──
+  const today = todayDate();
+  const people = [];
+
+  for (const key of keys) {
+    if (merged.has(key)) continue;
+    const p = rawMap[key];
+
+    let signupDate = p.meta.signupDate || null;
+    if (!signupDate && p.earliestEventDate && p.earliestWeekNum) {
+      const offset = WEEK_OFFSETS[p.earliestWeekNum - 1] || 7;
+      const est = new Date(p.earliestEventDate);
+      est.setDate(est.getDate() - offset);
+      signupDate = est.toISOString().split('T')[0];
+    }
+
+    const sd = parseDate(signupDate);
+    const currentDay = sd ? daysBetween(sd, today) : 0;
+    let sponsor = p.meta.sponsor || p.enrollerFromTitle || '—';
+    sponsor = sponsor.replace(/\s*\(.*?\)\s*/g, '').trim() || '—';
+
+    people.push({
+      name: p.name,
+      jifuId: p.meta.jifuId || '—',
+      signupDate: signupDate || '—',
+      sponsor,
+      fb: p.meta.fb || '',
+      messenger: p.meta.messenger || '',
+      currentDay,
+      weeks: p.weeks,
+      hasQuit: p.hasQuit
+    });
+  }
+
+  return people;
+}
+
+// ── Rendering ──────────────────────────────────────────────────────────
+
+function renderTimeline(allPeople) {
+  const filter = document.getElementById('filterStatus').value;
+  const sort = document.getElementById('sortBy').value;
+
+  let people = [...allPeople];
+
+  if (filter === 'fresh') people = people.filter(p => p.currentDay >= 0 && p.currentDay <= 30);
+  else if (filter === 'mid') people = people.filter(p => p.currentDay > 30 && p.currentDay <= 60);
+  else if (filter === 'late') people = people.filter(p => p.currentDay > 60 && p.currentDay <= 90);
+  else people = people.filter(p => p.currentDay >= 0 && p.currentDay <= 90);
+
+  if (sort === 'newest') people.sort((a, b) => a.currentDay - b.currentDay);
+  else if (sort === 'oldest') people.sort((a, b) => b.currentDay - a.currentDay);
+  else if (sort === 'day-desc') people.sort((a, b) => b.currentDay - a.currentDay);
+  else people.sort((a, b) => a.name.localeCompare(b.name, 'pl'));
+
+  const total = people.length;
+  const quit = people.filter(p => p.hasQuit).length;
+  const active = total - quit;
+  document.getElementById('statsArea').innerHTML = `
+    <div class="stat-box"><div class="stat-num" style="color:#2563eb">${total}</div><div class="stat-label">Osob</div></div>
+    <div class="stat-box"><div class="stat-num" style="color:#16a34a">${active}</div><div class="stat-label">Aktywni</div></div>
+    <div class="stat-box"><div class="stat-num" style="color:#dc2626">${quit}</div><div class="stat-label">Quit</div></div>
+  `;
+
+  // Enroller ranking
+  const panel = document.getElementById('summaryPanel');
+  panel.style.display = 'block';
+
+  const members90 = allPeople.filter(p => p.currentDay >= 0 && p.currentDay <= 90);
+  const enrollerMap = {};
+  for (const p of members90) {
+    const sp = p.sponsor && p.sponsor !== '—' ? p.sponsor : 'Nieznany';
+    enrollerMap[sp] = (enrollerMap[sp] || 0) + 1;
+  }
+  const enrollersSorted = Object.entries(enrollerMap).sort((a, b) => b[1] - a[1]);
+  const maxCount = enrollersSorted.length > 0 ? enrollersSorted[0][1] : 1;
+
+  function shortName(full) {
+    const parts = full.trim().split(/\s+/);
+    if (parts.length <= 1) return full;
+    let last = parts[parts.length - 1];
+    if (last.includes('-')) last = last.split('-').pop();
+    return parts[0][0] + '.' + last;
+  }
+
+  let gridHtml = '';
+  enrollersSorted.forEach(([name, count]) => {
+    const barW = Math.round((count / maxCount) * 100);
+    gridHtml += `<div class="enroller-row">
+      <span class="enroller-name" title="${name}">${shortName(name)}</span>
+      <span class="enroller-count">${count}</span>
+      <div class="enroller-bar-wrap"><div class="enroller-bar-fill" style="width:${barW}%"></div></div>
+    </div>`;
+  });
+  document.getElementById('enrollerGrid').innerHTML = gridHtml;
+
+  if (people.length === 0) {
+    document.getElementById('content').innerHTML = '<div class="loading" style="color:#94a3b8">Brak osob w wybranym filtrze.</div>';
+    return;
+  }
+
+  let html = '<div class="table-wrap"><table>';
+  html += `<thead><tr>
+    <th style="min-width:200px;">Osoba</th>
+    <th class="center" style="min-width:60px;">Dzien</th>
+    <th style="min-width:160px;">Progress</th>
+    <th class="center" style="line-height:1.2;">W1<div style="font-size:0.5rem;font-weight:500;color:#94a3b8;text-transform:none;letter-spacing:0;">kopiuj-wklej</div></th>
+    <th class="center" style="line-height:1.2;">W2<div style="font-size:0.5rem;font-weight:500;color:#94a3b8;text-transform:none;letter-spacing:0;">skaner</div></th>
+    <th class="center" style="line-height:1.2;">W3<div style="font-size:0.5rem;font-weight:500;color:#94a3b8;text-transform:none;letter-spacing:0;">TP + residual</div></th>
+    <th class="center" style="line-height:1.2;">W4<div style="font-size:0.5rem;font-weight:500;color:#94a3b8;text-transform:none;letter-spacing:0;">opinia</div></th>
+    <th class="center" style="line-height:1.2;">W5<div style="font-size:0.5rem;font-weight:500;color:#94a3b8;text-transform:none;letter-spacing:0;">last touch</div></th>
+    <th>Signup</th>
+  </tr></thead><tbody>`;
+
+  for (const p of people) {
+    const pct = Math.min(100, Math.round((p.currentDay / TOTAL_DAYS) * 100));
+    const rowCls = p.hasQuit ? 'quit-row' : '';
+
+    let dayColorCls = 'day-green';
+    if (p.hasQuit) dayColorCls = 'day-gray';
+    else if (p.currentDay > 60) dayColorCls = 'day-red';
+    else if (p.currentDay > 30) dayColorCls = 'day-yellow';
+
+    let pgCls = 'pg-green';
+    if (p.hasQuit) pgCls = 'pg-gray';
+    else if (p.currentDay > 60) pgCls = 'pg-red';
+    else if (p.currentDay > 30) pgCls = 'pg-yellow';
+
+    html += `<tr class="${rowCls}">`;
+
+    const idLabel = p.jifuId !== '—' ? ` <span class="p-id">#${p.jifuId}</span>` : '';
+    const fbLink = p.fb && !p.fb.includes('BRAK') ? p.fb : '';
+    const nameHtml = fbLink ? `<a href="${fbLink}" target="_blank" rel="noopener" title="Otworz Facebook">${p.name}</a>` : p.name;
+    html += `<td><div class="p-name">${nameHtml}${idLabel}</div><div class="p-meta">${p.sponsor}</div></td>`;
+
+    html += `<td class="day-num ${dayColorCls}">${p.currentDay}<div class="day-small">/ ${TOTAL_DAYS}</div></td>`;
+
+    const cycleMarks = [28, 56, 84].map(d => {
+      const leftPct = (d / TOTAL_DAYS) * 100;
+      return `<div class="cycle-mark" style="left:${leftPct}%"></div><div class="cycle-label" style="left:${leftPct}%">${d}</div>`;
+    }).join('');
+    html += `<td class="progress-wrap"><div class="progress-outer"><div class="progress-inner ${pgCls}" style="width:${pct}%"></div>${cycleMarks}</div><div class="progress-label"><span>0</span><span>${TOTAL_DAYS}</span></div></td>`;
+
+    for (let w = 1; w <= 5; w++) {
+      const weekDay = WEEK_OFFSETS[w - 1];
+      const status = p.weeks[w] || 'none';
+      let iconCls, iconTxt;
+      if (status === 'replied') { iconCls = 'ws-replied'; iconTxt = '✅'; }
+      else if (status === 'sent') { iconCls = 'ws-sent'; iconTxt = '📝'; }
+      else if (status === 'quit') { iconCls = 'ws-quit'; iconTxt = '❌'; }
+      else if (status === 'paused') { iconCls = 'ws-sent'; iconTxt = '⏳'; }
+      else if (p.currentDay < weekDay) { iconCls = 'ws-future'; iconTxt = '·'; }
+      else if (status === 'exists') { iconCls = 'ws-pending'; iconTxt = w; }
+      else { iconCls = 'ws-missing'; iconTxt = '—'; }
+      html += `<td class="ws"><span class="ws-icon ${iconCls}" title="WEEK ${w} (dzien ${weekDay})">${iconTxt}</span></td>`;
+    }
+
+    html += `<td class="signup-cell">${fmtDate(p.signupDate)}</td>`;
+    html += '</tr>';
+  }
+
+  html += '</tbody></table></div>';
+  document.getElementById('content').innerHTML = html;
+}
+
+// ── Main ───────────────────────────────────────────────────────────────
+
+let cachedPeople = [];
+
+async function loadTimeline() {
+  document.getElementById('content').innerHTML = '<div class="loading"><span class="spinner"></span> Pobieram dane z kalendarza LEG #2...</div>';
+  try {
+    const events = await fetchAllCalendarEvents();
+    cachedPeople = buildPeopleFromEvents(events);
+    renderTimeline(cachedPeople);
+  } catch (e) {
+    document.getElementById('content').innerHTML = '<div class="error"><strong>Blad:</strong> ' + e.message + '<br><br><span style="font-weight:500;font-size:0.78rem;color:#7f1d1d;">Sprawdz: (1) kalendarz LEG #2 jest publiczny; (2) klucz API jest aktywny i ma uprawnienia do Calendar API; (3) HTTP referer restrictions pozwala na ta domene.</span></div>';
+  }
+}
+
+document.getElementById('filterStatus').addEventListener('change', () => renderTimeline(cachedPeople));
+document.getElementById('sortBy').addEventListener('change', () => renderTimeline(cachedPeople));
+
+// ── PNG export ─────────────────────────────────────────────────────────
+
+function downloadPNG() {
+  const btn = document.getElementById('btnDownload');
+  btn.textContent = '⏳ Generuję...';
+  btn.disabled = true;
+
+  const people = [...cachedPeople].filter(p => p.currentDay >= 0 && p.currentDay <= 90);
+  people.sort((a, b) => a.currentDay - b.currentDay);
+
+  const W = 1080;
+  const PAD = 40;
+  const ROW_H = 56;
+  const HEADER_H = 100;
+  const STATS_H = 90;
+  const LEGEND_H = 44;
+  const TABLE_HEAD_H = 36;
+  const FOOTER_H = 50;
+
+  const eMap = {};
+  for (const p of people) { const sp = p.sponsor !== '—' ? p.sponsor : '?'; eMap[sp] = (eMap[sp]||0)+1; }
+  const eSorted = Object.entries(eMap).sort((a,b) => b[1]-a[1]);
+  const eRows = Math.ceil(eSorted.length / 4);
+
+  const total = people.length;
+  const quit = people.filter(p => p.hasQuit).length;
+  const active = total - quit;
+
+  const H = HEADER_H + STATS_H + (eRows * 32 + 40) + LEGEND_H + TABLE_HEAD_H + people.length * ROW_H + FOOTER_H + 20;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = W * 2;
+  canvas.height = H * 2;
+  const c = canvas.getContext('2d');
+  c.scale(2, 2);
+
+  const font = (w, s) => c.font = `${w} ${s}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+  function roundRect(x, y, w, h, r) {
+    c.beginPath();
+    c.moveTo(x+r, y);
+    c.arcTo(x+w, y, x+w, y+h, r);
+    c.arcTo(x+w, y+h, x, y+h, r);
+    c.arcTo(x, y+h, x, y, r);
+    c.arcTo(x, y, x+w, y, r);
+    c.closePath();
+  }
+  function shortName(full) {
+    const parts = full.trim().split(/\s+/);
+    if (parts.length <= 1) return full;
+    let last = parts[parts.length - 1];
+    if (last.includes('-')) last = last.split('-').pop();
+    return parts[0][0] + '.' + last;
+  }
+
+  c.fillStyle = '#f8fafc';
+  c.fillRect(0, 0, W, H);
+
+  c.fillStyle = '#ffffff';
+  c.fillRect(0, 0, W, HEADER_H);
+  c.fillStyle = '#e2e8f0';
+  c.fillRect(0, HEADER_H - 1, W, 1);
+
+  font('800', 28);
+  c.fillStyle = '#1e293b';
+  c.fillText('Timeline 2.0', PAD, 42);
+
+  font('500', 13);
+  c.fillStyle = '#64748b';
+  c.fillText('LEG #2 HARD ONBOARD | Calendar-Driven | Cykl 90d', PAD, 64);
+
+  const today = new Date();
+  const months = ['STY','LUT','MAR','KWI','MAJ','CZE','LIP','SIE','WRZ','PAŹ','LIS','GRU'];
+  const dateStr = today.getDate() + ' ' + months[today.getMonth()] + ' ' + today.getFullYear();
+  font('700', 14);
+  c.fillStyle = '#2563eb';
+  c.textAlign = 'right';
+  c.fillText(dateStr, W - PAD, 42);
+  c.textAlign = 'left';
+
+  let sy = HEADER_H + 16;
+  const statW = (W - PAD * 2 - 24) / 3;
+  const statsData = [
+    { num: total, label: 'OSÓB', color: '#2563eb' },
+    { num: active, label: 'AKTYWNI', color: '#16a34a' },
+    { num: quit, label: 'QUIT', color: '#dc2626' }
+  ];
+  statsData.forEach((s, i) => {
+    const sx = PAD + i * (statW + 12);
+    roundRect(sx, sy, statW, 58, 12);
+    c.fillStyle = '#ffffff';
+    c.fill();
+    c.strokeStyle = '#e2e8f0';
+    c.lineWidth = 1;
+    c.stroke();
+    font('900', 28);
+    c.fillStyle = s.color;
+    c.textAlign = 'center';
+    c.fillText(s.num, sx + statW/2, sy + 30);
+    font('700', 10);
+    c.fillStyle = '#94a3b8';
+    c.fillText(s.label, sx + statW/2, sy + 48);
+  });
+  c.textAlign = 'left';
+
+  let ey = sy + STATS_H;
+  font('700', 11);
+  c.fillStyle = '#64748b';
+  c.fillText('TOP ENROLLERS', PAD, ey + 4);
+  ey += 14;
+
+  const chipW = (W - PAD * 2 - 36) / 4;
+  eSorted.forEach(([name, count], i) => {
+    const col = i % 4;
+    const row = Math.floor(i / 4);
+    const cx = PAD + col * (chipW + 12);
+    const cy = ey + row * 30;
+    roundRect(cx, cy, chipW, 24, 8);
+    c.fillStyle = '#f1f5f9';
+    c.fill();
+    font('800', 13);
+    c.fillStyle = '#2563eb';
+    c.fillText(count, cx + 8, cy + 17);
+    font('600', 12);
+    c.fillStyle = '#1e293b';
+    c.fillText(shortName(name), cx + 28, cy + 17);
+  });
+
+  let ly = ey + eRows * 30 + 16;
+  const legends = [
+    { bg: '#dcfce7', fg: '#16a34a', txt: '✅', label: 'Odpisał/a' },
+    { bg: '#dbeafe', fg: '#2563eb', txt: '📝', label: 'Wysłano' },
+    { bg: '#f1f5f9', fg: '#94a3b8', txt: '—', label: 'Czeka' },
+    { bg: '#fecaca', fg: '#dc2626', txt: '❌', label: 'Quit' },
+    { bg: '#f8fafc', fg: '#cbd5e1', txt: '·', label: 'Przyszły', border: '#e2e8f0' }
+  ];
+  let lx = PAD;
+  legends.forEach(l => {
+    roundRect(lx, ly, 20, 20, 5);
+    c.fillStyle = l.bg;
+    c.fill();
+    if (l.border) { c.strokeStyle = l.border; c.lineWidth = 1; c.stroke(); }
+    font('700', 10);
+    c.fillStyle = l.fg;
+    c.textAlign = 'center';
+    c.fillText(l.txt, lx + 10, ly + 15);
+    c.textAlign = 'left';
+    font('500', 11);
+    c.fillStyle = '#64748b';
+    c.fillText(l.label, lx + 24, ly + 15);
+    lx += c.measureText(l.label).width + 44;
+  });
+
+  let ty = ly + LEGEND_H;
+  c.fillStyle = '#f1f5f9';
+  c.fillRect(PAD, ty, W - PAD*2, TABLE_HEAD_H);
+  font('700', 10);
+  c.fillStyle = '#64748b';
+  const cols = { day: PAD + 8, name: PAD + 70, progress: PAD + 460, w1: PAD + 680, w2: PAD + 730, w3: PAD + 780, w4: PAD + 830, w5: PAD + 880, signup: PAD + 940 };
+  c.fillText('DZIEŃ', cols.day, ty + 22);
+  c.fillText('OSOBA', cols.name, ty + 22);
+  c.fillText('PROGRESS', cols.progress, ty + 22);
+  c.fillText('W1', cols.w1, ty + 22);
+  c.fillText('W2', cols.w2, ty + 22);
+  c.fillText('W3', cols.w3, ty + 22);
+  c.fillText('W4', cols.w4, ty + 22);
+  c.fillText('W5', cols.w5, ty + 22);
+  c.fillText('SIGNUP', cols.signup, ty + 22);
+
+  let ry = ty + TABLE_HEAD_H;
+  for (const p of people) {
+    const alpha = p.hasQuit ? 0.4 : 1;
+    c.globalAlpha = alpha;
+
+    c.fillStyle = '#f1f5f9';
+    c.fillRect(PAD, ry + ROW_H - 1, W - PAD*2, 1);
+
+    let dayColor = '#16a34a';
+    if (p.hasQuit) dayColor = '#94a3b8';
+    else if (p.currentDay > 60) dayColor = '#dc2626';
+    else if (p.currentDay > 30) dayColor = '#d97706';
+    font('800', 22);
+    c.fillStyle = dayColor;
+    c.textAlign = 'center';
+    c.fillText(p.currentDay, cols.day + 24, ry + 28);
+    font('500', 9);
+    c.fillStyle = '#94a3b8';
+    c.fillText('/ 90', cols.day + 24, ry + 42);
+    c.textAlign = 'left';
+
+    font('700', 15);
+    c.fillStyle = '#1e293b';
+    const nameText = p.jifuId !== '—' ? p.name + ' #' + p.jifuId : p.name;
+    c.fillText(nameText, cols.name, ry + 24);
+    font('500', 11);
+    c.fillStyle = '#64748b';
+    c.fillText(p.sponsor, cols.name, ry + 42);
+
+    const pct = Math.min(100, Math.round((p.currentDay / 90) * 100));
+    const barW = 190;
+    const barH = 10;
+    const barY = ry + 20;
+    roundRect(cols.progress, barY, barW, barH, 5);
+    c.fillStyle = '#e2e8f0';
+    c.fill();
+    if (pct > 0) {
+      roundRect(cols.progress, barY, barW * pct / 100, barH, 5);
+      if (p.hasQuit) c.fillStyle = '#94a3b8';
+      else if (p.currentDay > 60) c.fillStyle = '#dc2626';
+      else if (p.currentDay > 30) c.fillStyle = '#d97706';
+      else c.fillStyle = '#16a34a';
+      c.fill();
+    }
+    [28, 56, 84].forEach(d => {
+      const mx = cols.progress + (d / 90) * barW;
+      c.fillStyle = '#94a3b8';
+      c.globalAlpha = alpha * 0.4;
+      c.fillRect(mx, barY - 2, 1.5, barH + 4);
+      c.globalAlpha = alpha;
+    });
+
+    const weekCols = [cols.w1, cols.w2, cols.w3, cols.w4, cols.w5];
+    const weekOffsets = [7, 14, 21, 30, 35];
+    for (let w = 0; w < 5; w++) {
+      const st = p.weeks[w + 1] || 'none';
+      let bg, fg, txt;
+      if (st === 'replied') { bg = '#dcfce7'; fg = '#16a34a'; txt = '✅'; }
+      else if (st === 'sent') { bg = '#dbeafe'; fg = '#2563eb'; txt = '📝'; }
+      else if (st === 'quit') { bg = '#fecaca'; fg = '#dc2626'; txt = '❌'; }
+      else if (p.currentDay < weekOffsets[w]) { bg = '#f8fafc'; fg = '#e2e8f0'; txt = '·'; }
+      else if (st === 'exists') { bg = '#f1f5f9'; fg = '#94a3b8'; txt = String(w + 1); }
+      else { bg = '#f1f5f9'; fg = '#cbd5e1'; txt = '—'; }
+      roundRect(weekCols[w], ry + 12, 28, 28, 7);
+      c.fillStyle = bg;
+      c.fill();
+      if (p.currentDay < weekOffsets[w] && st === 'none') {
+        c.strokeStyle = '#e2e8f0'; c.lineWidth = 1; c.stroke();
+      }
+      font('700', 12);
+      c.fillStyle = fg;
+      c.textAlign = 'center';
+      c.fillText(txt, weekCols[w] + 14, ry + 31);
+      c.textAlign = 'left';
+    }
+
+    font('500', 11);
+    c.fillStyle = '#64748b';
+    const sd = p.signupDate;
+    const sdm = sd && sd !== '—' ? sd.match(/\d{4}-(\d{2})-(\d{2})/) : null;
+    c.fillText(sdm ? sdm[2] + '.' + sdm[1] : '—', cols.signup, ry + 30);
+
+    c.globalAlpha = 1;
+    ry += ROW_H;
+  }
+
+  c.fillStyle = '#e2e8f0';
+  c.fillRect(PAD, ry + 8, W - PAD*2, 1);
+  font('500', 11);
+  c.fillStyle = '#94a3b8';
+  c.textAlign = 'center';
+  c.fillText('Take Profit Crew — Timeline System', W/2, ry + 30);
+  c.textAlign = 'left';
+
+  const a = document.createElement('a');
+  a.download = 'timeline-prawa-noga-' + new Date().toISOString().split('T')[0] + '.png';
+  a.href = canvas.toDataURL('image/png');
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+  btn.textContent = '⬇ Pobierz PNG';
+  btn.disabled = false;
+}
+
+loadTimeline();
+</script>
+</body>
+</html>
